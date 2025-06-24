@@ -1,0 +1,299 @@
+
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Plus, MoreHorizontal, Trash2, Edit } from 'lucide-react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useTaskStore, Task } from '@/store/taskStore';
+import { TaskColumn } from '@/components/TaskColumn';
+import { TaskCard } from '@/components/TaskCard';
+import { CreateTaskDialog } from '@/components/CreateTaskDialog';
+
+const BoardDetail = () => {
+  const { boardId } = useParams<{ boardId: string }>();
+  const {
+    getBoardById,
+    getColumnsByBoardId,
+    addColumn,
+    deleteColumn,
+    updateColumn,
+    moveTask,
+    reorderTasks,
+    reorderColumns,
+  } = useTaskStore();
+
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [isCreateColumnDialogOpen, setIsCreateColumnDialogOpen] = useState(false);
+  const [isCreateTaskDialogOpen, setIsCreateTaskDialogOpen] = useState(false);
+  const [selectedColumnId, setSelectedColumnId] = useState<string>('');
+  const [newColumnTitle, setNewColumnTitle] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 3,
+      },
+    })
+  );
+
+  if (!boardId) {
+    return <div>Board not found</div>;
+  }
+
+  const board = getBoardById(boardId);
+  const columns = getColumnsByBoardId(boardId);
+
+  if (!board) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
+        <div className="text-center animate-in fade-in-0 zoom-in-95">
+          <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-4xl">
+            😔
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Board not found</h1>
+          <Link 
+            to="/" 
+            className="text-blue-600 hover:text-blue-800 transition-colors hover:underline"
+          >
+            ← Back to Boards
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const handleCreateColumn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newColumnTitle.trim()) {
+      addColumn({
+        title: newColumnTitle.trim(),
+        boardId,
+        position: columns.length,
+      });
+      setNewColumnTitle('');
+      setIsCreateColumnDialogOpen(false);
+    }
+  };
+
+  const handleDeleteColumn = (columnId: string) => {
+    if (window.confirm('Are you sure you want to delete this column? All tasks in this column will also be deleted.')) {
+      deleteColumn(columnId);
+    }
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (active.data.current?.type === 'task') {
+      setActiveTask(active.data.current.task);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveTask(null);
+
+    if (!over) return;
+
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
+
+    if (activeType === 'task') {
+      const activeTaskId = active.id as string;
+      const activeColumnId = active.data.current?.columnId;
+
+      if (overType === 'column') {
+        const overColumnId = over.id as string;
+        const overTasks = useTaskStore.getState().getTasksByColumnId(overColumnId);
+        moveTask(activeTaskId, activeColumnId, overColumnId, overTasks.length);
+      } else if (overType === 'task') {
+        const overTask = over.data.current?.task;
+        const overColumnId = overTask.columnId;
+        const overTasks = useTaskStore.getState().getTasksByColumnId(overColumnId);
+        const overIndex = overTasks.findIndex(task => task.id === overTask.id);
+        moveTask(activeTaskId, activeColumnId, overColumnId, overIndex);
+      }
+    }
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
+
+    if (activeType === 'task' && overType === 'task') {
+      const activeTaskId = active.id as string;
+      const overTask = over.data.current?.task;
+      const activeColumnId = active.data.current?.columnId;
+      const overColumnId = overTask.columnId;
+
+      if (activeColumnId !== overColumnId) {
+        const overTasks = useTaskStore.getState().getTasksByColumnId(overColumnId);
+        const overIndex = overTasks.findIndex(task => task.id === overTask.id);
+        moveTask(activeTaskId, activeColumnId, overColumnId, overIndex);
+      }
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 animate-in fade-in-0">
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between mb-6 animate-in slide-in-from-top-4">
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/"
+              className="flex items-center text-gray-600 hover:text-blue-600 transition-all duration-200 hover:scale-105 group"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+              Back to Boards
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {board.title}
+              </h1>
+              {board.description && (
+                <p className="text-gray-600 mt-1 animate-in slide-in-from-left-2" style={{ animationDelay: '200ms' }}>
+                  {board.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex space-x-2 animate-in slide-in-from-right-4">
+            <Dialog open={isCreateColumnDialogOpen} onOpenChange={setIsCreateColumnDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="outline"
+                  className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Column
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md animate-in fade-in-0 zoom-in-95">
+                <DialogHeader>
+                  <DialogTitle>Create New Column</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleCreateColumn} className="space-y-4">
+                  <div>
+                    <Label htmlFor="columnTitle">Column Title</Label>
+                    <Input
+                      id="columnTitle"
+                      value={newColumnTitle}
+                      onChange={(e) => setNewColumnTitle(e.target.value)}
+                      placeholder="Enter column title"
+                      required
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsCreateColumnDialogOpen(false)}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      className="bg-blue-600 hover:bg-blue-700 transition-colors"
+                    >
+                      Create Column
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <Button
+              onClick={() => setIsCreateTaskDialogOpen(true)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
+          </div>
+        </div>
+
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragOver={handleDragOver}
+        >
+          <div className="flex space-x-6 overflow-x-auto pb-6">
+            <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
+              {columns.map((column, index) => (
+                <div 
+                  key={column.id}
+                  className="animate-in slide-in-from-bottom-4"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <TaskColumn
+                    column={column}
+                    onDeleteColumn={handleDeleteColumn}
+                    onCreateTask={(columnId) => {
+                      setSelectedColumnId(columnId);
+                      setIsCreateTaskDialogOpen(true);
+                    }}
+                  />
+                </div>
+              ))}
+            </SortableContext>
+
+            {columns.length === 0 && (
+              <div className="flex-1 flex items-center justify-center py-16 animate-in fade-in-0 zoom-in-95">
+                <div className="text-center">
+                  <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-4xl animate-bounce">
+                    📋
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
+                  <p className="text-gray-500 mb-4">Create your first column to start organizing tasks</p>
+                  <Button 
+                    onClick={() => setIsCreateColumnDialogOpen(true)} 
+                    variant="outline"
+                    className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Column
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DragOverlay>
+            {activeTask ? <TaskCard task={activeTask} isOverlay /> : null}
+          </DragOverlay>
+        </DndContext>
+
+        <CreateTaskDialog
+          isOpen={isCreateTaskDialogOpen}
+          onClose={() => {
+            setIsCreateTaskDialogOpen(false);
+            setSelectedColumnId('');
+          }}
+          boardId={boardId}
+          preselectedColumnId={selectedColumnId}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default BoardDetail;
