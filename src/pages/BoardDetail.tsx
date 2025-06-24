@@ -58,15 +58,15 @@ const BoardDetail = () => {
 
   if (!board) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
-        <div className="text-center animate-in fade-in-0 zoom-in-95">
-          <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-4xl">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 px-4">
+        <div className="text-center animate-in fade-in-0 zoom-in-95 max-w-md mx-auto">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-3xl sm:text-4xl">
             😔
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Board not found</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Board not found</h1>
           <Link 
             to="/" 
-            className="text-blue-600 hover:text-blue-800 transition-colors hover:underline"
+            className="text-blue-600 hover:text-blue-800 transition-colors hover:underline text-sm sm:text-base"
           >
             ← Back to Boards
           </Link>
@@ -151,40 +151,40 @@ const BoardDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 animate-in fade-in-0">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6 animate-in slide-in-from-top-4">
-          <div className="flex items-center space-x-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0 animate-in slide-in-from-top-4">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
             <Link
               to="/"
-              className="flex items-center text-gray-600 hover:text-blue-600 transition-all duration-200 hover:scale-105 group"
+              className="flex items-center text-gray-600 hover:text-blue-600 transition-all duration-200 hover:scale-105 group text-sm sm:text-base self-start"
             >
               <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
               Back to Boards
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
                 {board.title}
               </h1>
               {board.description && (
-                <p className="text-gray-600 mt-1 animate-in slide-in-from-left-2" style={{ animationDelay: '200ms' }}>
+                <p className="text-sm sm:text-base text-gray-600 mt-1 animate-in slide-in-from-left-2 line-clamp-2" style={{ animationDelay: '200ms' }}>
                   {board.description}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex space-x-2 animate-in slide-in-from-right-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 animate-in slide-in-from-right-4 w-full sm:w-auto">
             <Dialog open={isCreateColumnDialogOpen} onOpenChange={setIsCreateColumnDialogOpen}>
               <DialogTrigger asChild>
                 <Button 
                   variant="outline"
-                  className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105"
+                  className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105 w-full sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Column
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md animate-in fade-in-0 zoom-in-95">
+              <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95">
                 <DialogHeader>
                   <DialogTitle>Create New Column</DialogTitle>
                 </DialogHeader>
@@ -200,18 +200,18 @@ const BoardDetail = () => {
                       className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setIsCreateColumnDialogOpen(false)}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-50 transition-colors w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
                     <Button 
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 transition-colors"
+                      className="bg-blue-600 hover:bg-blue-700 transition-colors w-full sm:w-auto"
                     >
                       Create Column
                     </Button>
@@ -222,7 +222,7 @@ const BoardDetail = () => {
 
             <Button
               onClick={() => setIsCreateTaskDialogOpen(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl w-full sm:w-auto"
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Task
@@ -236,12 +236,12 @@ const BoardDetail = () => {
           onDragEnd={handleDragEnd}
           onDragOver={handleDragOver}
         >
-          <div className="flex space-x-6 overflow-x-auto pb-6">
+          <div className="flex space-x-4 sm:space-x-6 overflow-x-auto pb-4 sm:pb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
               {columns.map((column, index) => (
                 <div 
                   key={column.id}
-                  className="animate-in slide-in-from-bottom-4"
+                  className="animate-in slide-in-from-bottom-4 flex-shrink-0"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <TaskColumn
@@ -257,13 +257,13 @@ const BoardDetail = () => {
             </SortableContext>
 
             {columns.length === 0 && (
-              <div className="flex-1 flex items-center justify-center py-16 animate-in fade-in-0 zoom-in-95">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-4xl animate-bounce">
+              <div className="flex-1 flex items-center justify-center py-12 sm:py-16 animate-in fade-in-0 zoom-in-95">
+                <div className="text-center px-4">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-3xl sm:text-4xl animate-bounce">
                     📋
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
-                  <p className="text-gray-500 mb-4">Create your first column to start organizing tasks</p>
+                  <p className="text-sm sm:text-base text-gray-500 mb-4">Create your first column to start organizing tasks</p>
                   <Button 
                     onClick={() => setIsCreateColumnDialogOpen(true)} 
                     variant="outline"

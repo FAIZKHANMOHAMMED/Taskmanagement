@@ -50,21 +50,21 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
     <>
       <Card 
         ref={setNodeRef} 
-        className={`w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl ${
+        className={`w-72 sm:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl ${
           isOver ? 'bg-blue-50 border-blue-300 shadow-lg scale-105' : 'bg-gray-50 border-gray-200'
         }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 px-3 sm:px-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <h3 className={`font-semibold text-gray-900 transition-colors duration-200 ${
+            <div className="flex items-center space-x-2 min-w-0 flex-1">
+              <h3 className={`font-semibold text-gray-900 transition-colors duration-200 truncate text-sm sm:text-base ${
                 isHovered ? 'text-blue-600' : ''
               }`}>
                 {column.title}
               </h3>
-              <span className={`text-xs px-2 py-1 rounded-full transition-all duration-200 ${
+              <span className={`text-xs px-2 py-1 rounded-full transition-all duration-200 shrink-0 ${
                 tasks.length > 0 
                   ? 'bg-blue-100 text-blue-800 animate-pulse' 
                   : 'bg-gray-200 text-gray-700'
@@ -77,14 +77,14 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className={`transition-all duration-200 hover:bg-gray-200 hover:rotate-90 ${
+                  className={`transition-all duration-200 hover:bg-gray-200 hover:rotate-90 shrink-0 h-8 w-8 p-0 ${
                     isHovered ? 'opacity-100' : 'opacity-70'
                   }`}
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white border shadow-lg animate-in slide-in-from-top-2">
+              <DropdownMenuContent align="end" className="bg-white border shadow-lg animate-in slide-in-from-top-2 z-50">
                 <DropdownMenuItem 
                   onClick={() => setIsEditDialogOpen(true)}
                   className="hover:bg-blue-50 transition-colors"
@@ -103,7 +103,7 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 min-h-[200px]">
+        <CardContent className="space-y-3 min-h-[200px] px-3 sm:px-6">
           <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-3">
               {tasks.map((task, index) => (
@@ -121,17 +121,17 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
           {tasks.length === 0 && (
             <div className="flex items-center justify-center h-32 text-gray-400 animate-pulse">
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center text-lg sm:text-xl">
                   📋
                 </div>
-                <p className="text-sm">No tasks yet</p>
+                <p className="text-xs sm:text-sm">No tasks yet</p>
               </div>
             </div>
           )}
           
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group border-2 border-dashed border-transparent hover:border-blue-300"
+            className="w-full justify-start text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group border-2 border-dashed border-transparent hover:border-blue-300 text-sm"
             onClick={() => onCreateTask(column.id)}
           >
             <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
@@ -141,7 +141,7 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
       </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md animate-in fade-in-0 zoom-in-95">
+        <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95">
           <DialogHeader>
             <DialogTitle>Edit Column</DialogTitle>
           </DialogHeader>
@@ -157,18 +157,18 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
                 className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="flex justify-end space-x-2">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => setIsEditDialogOpen(false)}
-                className="hover:bg-gray-50 transition-colors"
+                className="hover:bg-gray-50 transition-colors w-full sm:w-auto"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 hover:bg-blue-700 transition-colors w-full sm:w-auto"
               >
                 Update Column
               </Button>
