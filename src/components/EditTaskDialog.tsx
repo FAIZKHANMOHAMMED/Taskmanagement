@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Task, useTaskStore } from '@/store/taskStore';
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { type Task, useTaskStore } from "@/store/taskStore"
 
 interface EditTaskDialogProps {
-  task: Task;
-  isOpen: boolean;
-  onClose: () => void;
+  task: Task
+  isOpen: boolean
+  onClose: () => void
 }
 
-export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
-  task,
-  isOpen,
-  onClose,
-}) => {
-  const { updateTask, columns } = useTaskStore();
+export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({ task, isOpen, onClose }) => {
+  const { updateTask, columns } = useTaskStore()
   const [editTask, setEditTask] = useState({
     title: task.title,
     description: task.description,
     creator: task.creator,
     priority: task.priority,
+    status: task.status,
     dueDate: task.dueDate,
     assignee: task.assignee,
     columnId: task.columnId,
-  });
+  })
 
   useEffect(() => {
     setEditTask({
@@ -35,17 +35,18 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
       description: task.description,
       creator: task.creator,
       priority: task.priority,
+      status: task.status,
       dueDate: task.dueDate,
       assignee: task.assignee,
       columnId: task.columnId,
-    });
-  }, [task]);
+    })
+  }, [task])
 
-  const taskColumn = columns.find(col => col.id === task.columnId);
-  const boardColumns = columns.filter(col => col.boardId === taskColumn?.boardId);
+  const taskColumn = columns.find((col) => col.id === task.columnId)
+  const boardColumns = columns.filter((col) => col.boardId === taskColumn?.boardId)
 
   const handleUpdateTask = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (editTask.title.trim() && editTask.creator.trim() && editTask.assignee.trim()) {
       updateTask(task.id, {
         ...editTask,
@@ -53,10 +54,10 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
         description: editTask.description.trim(),
         creator: editTask.creator.trim(),
         assignee: editTask.assignee.trim(),
-      });
-      onClose();
+      })
+      onClose()
     }
-  };
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -66,7 +67,9 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
         </DialogHeader>
         <form onSubmit={handleUpdateTask} className="space-y-4">
           <div>
-            <Label htmlFor="editTaskTitle" className="text-slate-300">Task Title</Label>
+            <Label htmlFor="editTaskTitle" className="text-slate-300">
+              Task Title
+            </Label>
             <Input
               id="editTaskTitle"
               value={editTask.title}
@@ -76,9 +79,11 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
             />
           </div>
-          
+
           <div>
-            <Label htmlFor="editTaskDescription" className="text-slate-300">Description</Label>
+            <Label htmlFor="editTaskDescription" className="text-slate-300">
+              Description
+            </Label>
             <Textarea
               id="editTaskDescription"
               value={editTask.description}
@@ -88,10 +93,12 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="editTaskCreator" className="text-slate-300">Creator</Label>
+              <Label htmlFor="editTaskCreator" className="text-slate-300">
+                Creator
+              </Label>
               <Input
                 id="editTaskCreator"
                 value={editTask.creator}
@@ -101,9 +108,11 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
               />
             </div>
-            
+
             <div>
-              <Label htmlFor="editTaskAssignee" className="text-slate-300">Assignee</Label>
+              <Label htmlFor="editTaskAssignee" className="text-slate-300">
+                Assignee
+              </Label>
               <Input
                 id="editTaskAssignee"
                 value={editTask.assignee}
@@ -114,11 +123,16 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="editTaskPriority" className="text-slate-300">Priority</Label>
-              <Select value={editTask.priority} onValueChange={(value: 'high' | 'medium' | 'low') => setEditTask({ ...editTask, priority: value })}>
+              <Label htmlFor="editTaskPriority" className="text-slate-300">
+                Priority
+              </Label>
+              <Select
+                value={editTask.priority}
+                onValueChange={(value: "high" | "medium" | "low") => setEditTask({ ...editTask, priority: value })}
+              >
                 <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                   <SelectValue />
                 </SelectTrigger>
@@ -129,22 +143,45 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div>
-              <Label htmlFor="editTaskDueDate" className="text-slate-300">Due Date</Label>
-              <Input
-                id="editTaskDueDate"
-                type="date"
-                value={editTask.dueDate}
-                onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
-                required
-                className="bg-slate-700 border-slate-600 text-white focus:ring-blue-500"
-              />
+              <Label htmlFor="editTaskStatus" className="text-slate-300">
+                Status
+              </Label>
+              <Select
+                value={editTask.status}
+                onValueChange={(value: "todo" | "in-progress" | "completed") => setEditTask({ ...editTask, status: value })}
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectItem value="todo">To Do</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          
+
           <div>
-            <Label htmlFor="editTaskColumn" className="text-slate-300">Column</Label>
+            <Label htmlFor="editTaskDueDate" className="text-slate-300">
+              Due Date
+            </Label>
+            <Input
+              id="editTaskDueDate"
+              type="date"
+              value={editTask.dueDate}
+              onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
+              required
+              className="bg-slate-700 border-slate-600 text-white focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="editTaskColumn" className="text-slate-300">
+              Column
+            </Label>
             <Select value={editTask.columnId} onValueChange={(value) => setEditTask({ ...editTask, columnId: value })}>
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                 <SelectValue placeholder="Select a column" />
@@ -158,18 +195,18 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="flex justify-end space-x-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={onClose}
               className="border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             >
               Update Task
@@ -178,5 +215,5 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

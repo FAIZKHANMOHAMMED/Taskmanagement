@@ -7,6 +7,7 @@ export interface Task {
   description: string;
   creator: string;
   priority: 'high' | 'medium' | 'low';
+  status: 'todo' | 'in-progress' | 'completed';
   dueDate: string;
   assignee: string;
   columnId: string;
@@ -48,6 +49,7 @@ interface TaskStore {
   addTask: (task: Omit<Task, 'id'>) => void;
   deleteTask: (taskId: string) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
+  updateTaskStatus: (taskId: string, status: 'todo' | 'in-progress' | 'completed') => void;
   moveTask: (taskId: string, sourceColumnId: string, destinationColumnId: string, destinationIndex: number) => void;
   reorderTasks: (columnId: string, sourceIndex: number, destinationIndex: number) => void;
   
@@ -146,6 +148,12 @@ export const useTaskStore = create<TaskStore>()(
       updateTask: (taskId, updates) => set((state) => ({
         tasks: state.tasks.map(task => 
           task.id === taskId ? { ...task, ...updates } : task
+        ),
+      })),
+
+      updateTaskStatus: (taskId, status) => set((state) => ({
+        tasks: state.tasks.map(task => 
+          task.id === taskId ? { ...task, status } : task
         ),
       })),
       

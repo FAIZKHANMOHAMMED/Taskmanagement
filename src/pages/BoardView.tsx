@@ -2,20 +2,43 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Plus, Calendar, User, Trash2, Zap, Users, Target, TrendingUp } from "lucide-react"
+import { Link, useNavigate } from "react-router-dom"
+import {
+  Plus,
+  Calendar,
+  User,
+  Trash2,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  BarChart3,
+  Target,
+  Users,
+  Zap,
+  ArrowRight,
+  Search,
+  Grid3X3,
+  List,
+  Settings,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
 import { useTaskStore } from "@/store/taskStore"
-import { format } from "date-fns"
+import { format, isToday, isThisWeek, isPast } from "date-fns"
 
 const BoardView = () => {
-  const { boards, addBoard, deleteBoard } = useTaskStore()
+  const navigate = useNavigate()
+  const { boards, tasks, columns, addBoard, deleteBoard } = useTaskStore()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [searchQuery, setSearchQuery] = useState("")
   const [newBoard, setNewBoard] = useState({
     title: "",
     description: "",
@@ -43,87 +66,141 @@ const BoardView = () => {
     }
   }
 
-  const stats = [
+  // Calculate productivity metrics
+  const totalTasks = tasks.length
+  const completedTasks = tasks.filter((task) => {
+    const column = columns.find((col) => col.id === task.columnId)
+    return column?.title.toLowerCase().includes("done") || column?.title.toLowerCase().includes("complete")
+  }).length
+  const overdueTasks = tasks.filter(
+    (task) =>
+      isPast(new Date(task.dueDate)) &&
+      !tasks
+        .filter((t) => {
+          const col = columns.find((c) => c.id === t.columnId)
+          return col?.title.toLowerCase().includes("done") || col?.title.toLowerCase().includes("complete")
+        })
+        .includes(task),
+  ).length
+  const todayTasks = tasks.filter((task) => isToday(new Date(task.dueDate))).length
+  const thisWeekTasks = tasks.filter((task) => isThisWeek(new Date(task.dueDate))).length
+
+  const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+  const activeProjects = boards.length
+  const teamMembers = new Set([...tasks.map((t) => t.assignee), ...tasks.map((t) => t.creator)]).size
+
+  // Recent activity
+  const recentBoards = boards
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3)
+
+  // Upcoming deadlines
+  const upcomingDeadlines = tasks
+    .filter((task) => !isPast(new Date(task.dueDate)))
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .slice(0, 5)
+
+  // Filter boards based on search
+  const filteredBoards = boards.filter(
+    (board) =>
+      board.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      board.description.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
+
+  const productivityStats = [
     {
-      title: "Total Boards",
-      value: boards.length,
-      icon: Target,
-      color: "from-blue-500 to-cyan-600",
-      bgColor: "bg-gradient-to-br from-blue-900/20 to-cyan-900/20",
-      iconColor: "text-blue-400",
+      title: "Task Completion",
+      value: `${completionRate}%`,
+      description: `${completedTasks} of ${totalTasks} tasks completed`,
+      icon: CheckCircle2,
+      color: "text-green-400",
+      bgColor: "bg-green-500/10",
+      progress: completionRate,
     },
     {
       title: "Active Projects",
-      value: boards.length,
-      icon: Zap,
-      color: "from-purple-500 to-pink-600",
-      bgColor: "bg-gradient-to-br from-purple-900/20 to-pink-900/20",
-      iconColor: "text-purple-400",
+      value: activeProjects.toString(),
+      description: `${recentBoards.length} created recently`,
+      icon: Target,
+      color: "text-blue-400",
+      bgColor: "bg-blue-500/10",
+      progress: Math.min((activeProjects / 10) * 100, 100),
     },
     {
       title: "Team Members",
-      value: new Set(boards.map((b) => b.createdBy)).size,
+      value: teamMembers.toString(),
+      description: "Collaborating across projects",
       icon: Users,
-      color: "from-green-500 to-emerald-600",
-      bgColor: "bg-gradient-to-br from-green-900/20 to-emerald-900/20",
-      iconColor: "text-green-400",
+      color: "text-purple-400",
+      bgColor: "bg-purple-500/10",
+      progress: Math.min((teamMembers / 20) * 100, 100),
     },
     {
-      title: "Productivity",
-      value: "98%",
-      icon: TrendingUp,
-      color: "from-orange-500 to-red-600",
-      bgColor: "bg-gradient-to-br from-orange-900/20 to-red-900/20",
-      iconColor: "text-orange-400",
+      title: "Overdue Tasks",
+      value: overdueTasks.toString(),
+      description: overdueTasks > 0 ? "Need immediate attention" : "All caught up!",
+      icon: AlertCircle,
+      color: overdueTasks > 0 ? "text-red-400" : "text-green-400",
+      bgColor: overdueTasks > 0 ? "bg-red-500/10" : "bg-green-500/10",
+      progress: totalTasks > 0 ? Math.min((overdueTasks / totalTasks) * 100, 100) : 0,
     },
   ]
 
+  const quickStats = [
+    { label: "Due Today", value: todayTasks, color: "text-orange-400" },
+    { label: "This Week", value: thisWeekTasks, color: "text-blue-400" },
+    { label: "Total Tasks", value: totalTasks, color: "text-slate-400" },
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
-          <div className="text-center space-y-4 sm:space-y-6 animate-in fade-in-0 slide-in-from-bottom-4">
-            <div className="inline-flex items-center px-3 sm:px-4 py-2 rounded-full bg-blue-900/30 text-blue-300 text-xs sm:text-sm font-medium animate-pulse border border-blue-700/30">
-              ✨ Welcome to TaskBoard Pro
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      {/* Header */}
+      <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white">TaskBoard Pro</h1>
+                  <p className="text-xs text-slate-400">Productivity Dashboard</p>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-slate-100 via-blue-300 to-purple-300 bg-clip-text text-transparent leading-tight">
-              Organize Your Work
-            </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed px-4">
-              Collaborate efficiently with your team using visual task boards. Create, manage, and track progress with
-              powerful drag-and-drop functionality.
-            </p>
-            <div className="flex justify-center px-4">
+            <div className="flex items-center space-x-3">
+              <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                <Settings className="w-4 h-4" />
+              </Button>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 sm:px-8 py-3 text-sm sm:text-base lg:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto">
-                    <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                    Create Your First Board
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Project
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
+                <DialogContent className="sm:max-w-md mx-4 bg-slate-800 border-slate-700 text-white">
                   <DialogHeader>
-                    <DialogTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                      Create New Board
+                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      Create New Project
                     </DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateBoard} className="space-y-4 sm:space-y-6">
-                    <div className="space-y-2">
+                  <form onSubmit={handleCreateBoard} className="space-y-4">
+                    <div>
                       <Label htmlFor="title" className="text-sm font-medium text-slate-300">
-                        Board Title
+                        Project Name
                       </Label>
                       <Input
                         id="title"
                         value={newBoard.title}
                         onChange={(e) => setNewBoard({ ...newBoard, title: e.target.value })}
-                        placeholder="Enter board title"
+                        placeholder="Enter project name"
                         required
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div>
                       <Label htmlFor="description" className="text-sm font-medium text-slate-300">
                         Description
                       </Label>
@@ -131,14 +208,14 @@ const BoardView = () => {
                         id="description"
                         value={newBoard.description}
                         onChange={(e) => setNewBoard({ ...newBoard, description: e.target.value })}
-                        placeholder="Enter board description (optional)"
+                        placeholder="Project description (optional)"
                         rows={3}
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
                       />
                     </div>
-                    <div className="space-y-2">
+                    <div>
                       <Label htmlFor="createdBy" className="text-sm font-medium text-slate-300">
-                        Created By
+                        Project Owner
                       </Label>
                       <Input
                         id="createdBy"
@@ -146,7 +223,7 @@ const BoardView = () => {
                         onChange={(e) => setNewBoard({ ...newBoard, createdBy: e.target.value })}
                         placeholder="Your name"
                         required
-                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                        className="bg-slate-700 border-slate-600 text-white placeholder-slate-400"
                       />
                     </div>
                     <div className="flex justify-end space-x-3 pt-4">
@@ -154,15 +231,15 @@ const BoardView = () => {
                         type="button"
                         variant="outline"
                         onClick={() => setIsCreateDialogOpen(false)}
-                        className="hover:bg-slate-700 transition-colors border-slate-600 text-slate-300 hover:text-white"
+                        className="border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700"
                       >
                         Cancel
                       </Button>
                       <Button
                         type="submit"
-                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                       >
-                        Create Board
+                        Create Project
                       </Button>
                     </div>
                   </form>
@@ -173,131 +250,305 @@ const BoardView = () => {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-4 sm:-mt-8 relative z-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8 sm:mb-12">
-          {stats.map((stat, index) => (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+        {/* Productivity Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {productivityStats.map((stat, index) => (
             <Card
               key={stat.title}
-              className={`${stat.bgColor} border-slate-700 bg-slate-800/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 animate-in slide-in-from-bottom-4`}
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="bg-slate-800/50 border-slate-700 backdrop-blur-sm hover:bg-slate-800/70 transition-all duration-300"
             >
-              <CardContent className="p-3 sm:p-4 lg:p-6">
-                <div className="flex flex-col sm:flex-row items-center sm:justify-between space-y-2 sm:space-y-0">
-                  <div className="text-center sm:text-left">
-                    <p className="text-xs sm:text-sm font-medium text-slate-400 mb-1">{stat.title}</p>
-                    <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100">{stat.value}</p>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
                   </div>
-                  <div className={`p-2 sm:p-3 rounded-lg ${stat.bgColor} border border-slate-600`}>
-                    <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${stat.iconColor}`} />
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-white">{stat.value}</div>
+                    <div className="text-xs text-slate-400">{stat.title}</div>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Progress value={stat.progress} className="h-2" />
+                  <p className="text-xs text-slate-400">{stat.description}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-      </div>
 
-      {/* Boards Section */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-16">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-100">Your Boards</h2>
-            <p className="text-sm sm:text-base text-slate-400">Manage and organize your team's work</p>
-          </div>
-
-          {boards.length > 0 && (
-            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Board
-                </Button>
-              </DialogTrigger>
-            </Dialog>
-          )}
-        </div>
-
-        {boards.length === 0 ? (
-          <div className="text-center py-12 sm:py-20 animate-in fade-in-0 zoom-in-95 px-4">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-xl p-8 sm:p-12 max-w-lg mx-auto border border-slate-700">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center border border-slate-600">
-                <Target className="w-8 h-8 sm:w-10 sm:h-10 text-blue-400" />
+        {/* Quick Stats Bar */}
+        <Card className="bg-slate-800/30 border-slate-700 backdrop-blur-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                {quickStats.map((stat, index) => (
+                  <div key={stat.label} className="flex items-center space-x-2">
+                    <div className={`text-lg font-semibold ${stat.color}`}>{stat.value}</div>
+                    <div className="text-sm text-slate-400">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-100 mb-3">No boards yet</h3>
-              <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 leading-relaxed">
-                Create your first board to start organizing your tasks and collaborating with your team effectively.
-              </p>
-              <Button
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 sm:px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 w-full sm:w-auto"
-              >
-                <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Create Your First Board
-              </Button>
+              <div className="flex items-center space-x-2 text-sm text-slate-400">
+                <Clock className="w-4 h-4" />
+                <span>Last updated: {format(new Date(), "HH:mm")}</span>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-            {boards.map((board, index) => (
-              <Link key={board.id} to={`/board/${board.id}`} className="group">
-                <Card
-                  className="h-full bg-slate-800/50 backdrop-blur-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 sm:hover:-translate-y-2 border border-slate-700 animate-in slide-in-from-bottom-4 hover:scale-105"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <CardHeader className="pb-3 sm:pb-4">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2 flex-1 min-w-0">
-                        <CardTitle className="text-lg sm:text-xl font-bold text-slate-100 group-hover:text-blue-400 transition-colors duration-200 truncate">
-                          {board.title}
-                        </CardTitle>
-                        <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full group-hover:w-16 sm:group-hover:w-20 transition-all duration-300"></div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleDeleteBoard(board.id, e)}
-                        className="opacity-0 group-hover:opacity-100 transition-all duration-200 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg shrink-0 ml-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    {board.description && (
-                      <CardDescription className="text-sm sm:text-base text-slate-400 line-clamp-2 leading-relaxed">
-                        {board.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent className="space-y-3 sm:space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs sm:text-sm space-y-2 sm:space-y-0">
-                      <div className="flex items-center space-x-2 text-slate-400 hover:text-slate-300 transition-colors">
-                        <div className="p-1.5 bg-slate-700 rounded-lg">
-                          <User className="w-3 h-3 text-blue-400" />
-                        </div>
-                        <span className="font-medium truncate">{board.createdBy}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-slate-400 hover:text-slate-300 transition-colors">
-                        <div className="p-1.5 bg-slate-700 rounded-lg">
-                          <Calendar className="w-3 h-3 text-green-400" />
-                        </div>
-                        <span>{format(new Date(board.createdAt), "MMM dd")}</span>
-                      </div>
-                    </div>
+          </CardContent>
+        </Card>
 
-                    <div className="pt-3 border-t border-slate-700">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-slate-500 font-medium">CLICK TO OPEN</span>
-                        <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                          <Plus className="w-3 h-3 text-white rotate-0 group-hover:rotate-90 transition-transform duration-200" />
-                        </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Projects Section */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Projects</h2>
+                <p className="text-slate-400">Manage your active projects</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search projects..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 w-64 bg-slate-800 border-slate-700 text-white placeholder-slate-400"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+                  className="border-slate-700 text-slate-400 hover:text-white"
+                >
+                  {viewMode === "grid" ? <List className="w-4 h-4" /> : <Grid3X3 className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            {filteredBoards.length === 0 ? (
+              <Card className="bg-slate-800/30 border-slate-700 border-dashed">
+                <CardContent className="p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-700 rounded-full flex items-center justify-center">
+                    <Target className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {searchQuery ? "No projects found" : "No projects yet"}
+                  </h3>
+                  <p className="text-slate-400 mb-6">
+                    {searchQuery
+                      ? "Try adjusting your search terms"
+                      : "Create your first project to start organizing your work"}
+                  </p>
+                  {!searchQuery && (
+                    <Button
+                      onClick={() => setIsCreateDialogOpen(true)}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create First Project
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 gap-6" : "space-y-4"}>
+                {filteredBoards.map((board) => {
+                  const boardTasks = tasks.filter((task) => {
+                    const column = columns.find((col) => col.id === task.columnId)
+                    return column?.boardId === board.id
+                  })
+                  const boardProgress =
+                    boardTasks.length > 0
+                      ? Math.round(
+                          (boardTasks.filter((task) => {
+                            const column = columns.find((col) => col.id === task.columnId)
+                            return (
+                              column?.title.toLowerCase().includes("done") ||
+                              column?.title.toLowerCase().includes("complete")
+                            )
+                          }).length /
+                            boardTasks.length) *
+                            100,
+                        )
+                      : 0
+
+                  return (
+                    <Link key={board.id} to={`/board/${board.id}`} className="group">
+                      <Card className="bg-slate-800/50 border-slate-700 hover:bg-slate-800/70 hover:border-slate-600 transition-all duration-300 group-hover:scale-[1.02]">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1 flex-1">
+                              <CardTitle className="text-lg text-white group-hover:text-blue-400 transition-colors">
+                                {board.title}
+                              </CardTitle>
+                              {board.description && (
+                                <CardDescription className="text-slate-400 line-clamp-2">
+                                  {board.description}
+                                </CardDescription>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleDeleteBoard(board.id, e)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex items-center space-x-1 text-slate-400">
+                                <User className="w-4 h-4" />
+                                <span>{board.createdBy}</span>
+                              </div>
+                              <div className="flex items-center space-x-1 text-slate-400">
+                                <Calendar className="w-4 h-4" />
+                                <span>{format(new Date(board.createdAt), "MMM dd")}</span>
+                              </div>
+                            </div>
+                            <Badge variant="secondary" className="bg-slate-700 text-slate-300">
+                              {boardTasks.length} tasks
+                            </Badge>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-slate-400">Progress</span>
+                              <span className="text-white font-medium">{boardProgress}%</span>
+                            </div>
+                            <Progress value={boardProgress} className="h-2" />
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-700">
+                            <span className="text-xs text-slate-500">Click to open project</span>
+                            <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Upcoming Deadlines */}
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-white flex items-center">
+                  <Clock className="w-5 h-5 mr-2 text-orange-400" />
+                  Upcoming Deadlines
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {upcomingDeadlines.length === 0 ? (
+                  <p className="text-slate-400 text-sm text-center py-4">No upcoming deadlines</p>
+                ) : (
+                  upcomingDeadlines.map((task) => (
+                    <div key={task.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{task.title}</p>
+                        <p className="text-xs text-slate-400">{task.assignee}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-slate-300">{format(new Date(task.dueDate), "MMM dd")}</p>
+                        <Badge
+                          variant="secondary"
+                          className={`text-xs ${
+                            isToday(new Date(task.dueDate))
+                              ? "bg-orange-500/20 text-orange-400"
+                              : "bg-slate-600 text-slate-300"
+                          }`}
+                        >
+                          {isToday(new Date(task.dueDate))
+                            ? "Today"
+                            : isThisWeek(new Date(task.dueDate))
+                              ? "This week"
+                              : "Upcoming"}
+                        </Badge>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                  ))
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-white flex items-center">
+                  <TrendingUp className="w-5 h-5 mr-2 text-green-400" />
+                  Recent Projects
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {recentBoards.length === 0 ? (
+                  <p className="text-slate-400 text-sm text-center py-4">No recent activity</p>
+                ) : (
+                  recentBoards.map((board) => (
+                    <Link key={board.id} to={`/board/${board.id}`} className="block">
+                      <div className="flex items-center space-x-3 p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Target className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{board.title}</p>
+                          <p className="text-xs text-slate-400">
+                            Created {format(new Date(board.createdAt), "MMM dd")}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-slate-400" />
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-white flex items-center">
+                  <Zap className="w-5 h-5 mr-2 text-yellow-400" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  variant="outline"
+                  className="w-full justify-start border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Project
+                </Button>
+                <Button
+                  onClick={() => navigate("/analytics")}
+                  variant="outline"
+                  className="w-full justify-start border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  View Analytics
+                </Button>
+                <Button
+                  onClick={() => navigate("/team-settings")}
+                  variant="outline"
+                  className="w-full justify-start border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Team Settings
+                </Button>
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )
