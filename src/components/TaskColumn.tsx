@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Plus, MoreHorizontal, Trash2, Edit } from 'lucide-react'
+import { Plus, MoreHorizontal, Trash2, Edit } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTaskStore, type Column, type Task } from "@/store/taskStore"
-import { TaskCard } from "./TaskCard"
+import { TaskCard } from "./TaskCard";
 import { HighlightText } from "./HighlightText"
 
 interface TaskColumnProps {
@@ -57,7 +57,7 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
     <>
       <Card
         ref={setNodeRef}
-        className={`w-72 sm:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 ${
+        className={`w-64 sm:w-72 lg:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 ${
           isOver
             ? "bg-gradient-to-br from-slate-700 to-slate-800 border-blue-400 shadow-2xl scale-105 ring-2 ring-blue-400"
             : "bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700"
@@ -67,10 +67,10 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <CardHeader className="pb-4 px-4 sm:px-6">
+        <CardHeader className="pb-4 px-3 sm:px-4 lg:px-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3 min-w-0 flex-1">
-              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex-shrink-0"></div>
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex-shrink-0"></div>
               <h3
                 className={`font-bold text-slate-100 transition-colors duration-200 truncate text-sm sm:text-base ${
                   isHovered ? "text-blue-300" : ""
@@ -93,11 +93,11 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`transition-all duration-200 hover:bg-slate-700 hover:rotate-90 shrink-0 h-8 w-8 p-0 text-slate-400 hover:text-white ${
+                  className={`transition-all duration-200 hover:bg-slate-700 hover:rotate-90 shrink-0 h-6 w-6 sm:h-8 sm:w-8 p-0 text-slate-400 hover:text-white ${
                     isHovered ? "opacity-100" : "opacity-70"
                   }`}
                 >
-                  <MoreHorizontal className="w-4 h-4" />
+                  <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
@@ -122,30 +122,28 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4 min-h-[200px] px-4 sm:px-6">
+        <CardContent className="space-y-3 sm:space-y-4 min-h-[200px] px-3 sm:px-4 lg:px-6">
           <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {tasks.map((task, index) => (
                 <div
                   key={task.id}
                   className="animate-in slide-in-from-left-1 fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <TaskCard task={task} searchQuery={searchQuery} />
+                  <TaskCard task={task} />
                 </div>
               ))}
             </div>
           </SortableContext>
 
           {tasks.length === 0 && (
-            <div className="flex items-center justify-center h-32 text-slate-400 animate-pulse">
+            <div className="flex items-center justify-center h-24 sm:h-32 text-slate-400 animate-pulse">
               <div className="text-center">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-xl sm:text-2xl border border-slate-600">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-lg sm:text-xl lg:text-2xl border border-slate-600">
                   📋
                 </div>
-                <p className="text-xs sm:text-sm font-medium">
-                  {searchQuery ? "No matching tasks" : "No tasks yet"}
-                </p>
+                <p className="text-xs sm:text-sm font-medium">{searchQuery ? "No matching tasks" : "No tasks yet"}</p>
                 <p className="text-xs text-slate-500 mt-1">
                   {searchQuery ? "Try adjusting your search" : "Drag tasks here or create new ones"}
                 </p>
@@ -155,10 +153,10 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
 
           <Button
             variant="ghost"
-            className="w-full justify-start text-slate-400 hover:text-blue-300 hover:bg-slate-700/50 transition-all duration-200 group border-2 border-dashed border-slate-600 hover:border-blue-400 text-sm py-3"
+            className="w-full justify-start text-slate-400 hover:text-blue-300 hover:bg-slate-700/50 transition-all duration-200 group border-2 border-dashed border-slate-600 hover:border-blue-400 text-xs sm:text-sm py-2 sm:py-3"
             onClick={() => onCreateTask(column.id)}
           >
-            <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
             Add a task
           </Button>
         </CardContent>

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { useParams, Link } from "react-router-dom"
-import { ArrowLeft, Plus } from "lucide-react"
+import { ArrowLeft, Plus, Menu } from "lucide-react"
 import {
   DndContext,
   type DragEndEvent,
@@ -20,9 +20,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useTaskStore, type Task } from "@/store/taskStore"
 import { TaskColumn } from "@/components/TaskColumn"
-import { TaskCard } from "@/components/TaskCard"
+import { TaskCard } from "../components/TaskCard"
 import { CreateTaskDialog } from "@/components/CreateTaskDialog"
 import { SearchBar, type SearchFilters } from "@/components/SearchBar"
 import { useSearch } from "@/hooks/useSearch"
@@ -50,6 +51,7 @@ const BoardDetail = () => {
   const [newColumnTitle, setNewColumnTitle] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({})
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -181,14 +183,34 @@ const BoardDetail = () => {
   // Determine which columns to show
   const columnsToShow = hasActiveSearch ? filteredColumns : allColumns
 
+  const MobileActions = () => (
+    <div className="space-y-3 p-4">
+      <Button
+        onClick={() => setIsCreateColumnDialogOpen(true)}
+        variant="outline"
+        className="w-full justify-start border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Column
+      </Button>
+      <Button
+        onClick={() => setIsCreateTaskDialogOpen(true)}
+        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+      >
+        <Plus className="w-4 h-4 mr-2" />
+        Add Task
+      </Button>
+    </div>
+  )
+
   if (!boardId || !board) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
         <div className="text-center animate-in fade-in-0 zoom-in-95 max-w-md mx-auto">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-3xl sm:text-4xl border border-slate-600">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-2xl sm:text-3xl lg:text-4xl border border-slate-600">
             😔
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 mb-4">Board not found</h1>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-100 mb-4">Board not found</h1>
           <Link
             to="/"
             className="text-blue-400 hover:text-blue-300 transition-colors hover:underline text-sm sm:text-base"
@@ -202,184 +224,205 @@ const BoardDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 animate-in fade-in-0">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0 animate-in slide-in-from-top-4">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-            <Link
-              to="/"
-              className="flex items-center text-slate-400 hover:text-blue-400 transition-all duration-200 hover:scale-105 group text-sm sm:text-base self-start"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
-              Back to Boards
-            </Link>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                {board.title}
-              </h1>
-              {board.description && (
-                <p
-                  className="text-sm sm:text-base text-slate-400 mt-1 animate-in slide-in-from-left-2 line-clamp-2"
-                  style={{ animationDelay: "200ms" }}
-                >
-                  {board.description}
-                </p>
-              )}
+      <div className="container mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4 lg:py-6">
+        <div className="flex flex-col space-y-4 sm:space-y-6 animate-in slide-in-from-top-4">
+          {/* Header */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+            <div className="flex flex-col space-y-3 w-full lg:w-auto">
+              <Link
+                to="/"
+                className="flex items-center text-slate-400 hover:text-blue-400 transition-all duration-200 hover:scale-105 group text-sm sm:text-base self-start"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+                Back to Boards
+              </Link>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-100 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
+                  {board.title}
+                </h1>
+                {board.description && (
+                  <p
+                    className="text-sm sm:text-base text-slate-400 mt-1 animate-in slide-in-from-left-2 line-clamp-2"
+                    style={{ animationDelay: "200ms" }}
+                  >
+                    {board.description}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop Actions */}
+            <div className="hidden sm:flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2 animate-in slide-in-from-right-4 w-full lg:w-auto">
+              <Dialog open={isCreateColumnDialogOpen} onOpenChange={setIsCreateColumnDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 w-full lg:w-auto border-slate-600 text-slate-300 hover:text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Column
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
+                  <DialogHeader>
+                    <DialogTitle className="text-slate-100">Create New Column</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateColumn} className="space-y-4">
+                    <div>
+                      <Label htmlFor="columnTitle" className="text-slate-300">
+                        Column Title
+                      </Label>
+                      <Input
+                        id="columnTitle"
+                        value={newColumnTitle}
+                        onChange={(e) => setNewColumnTitle(e.target.value)}
+                        placeholder="Enter column title"
+                        required
+                        className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                      />
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsCreateColumnDialogOpen(false)}
+                        className="hover:bg-slate-700 transition-colors w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors w-full sm:w-auto"
+                      >
+                        Create Column
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+
+              <Button
+                onClick={() => setIsCreateTaskDialogOpen(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl w-full lg:w-auto"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Task
+              </Button>
+            </div>
+
+            {/* Mobile Menu */}
+            <div className="sm:hidden w-full">
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full border-slate-600 text-slate-300 hover:text-white">
+                    <Menu className="w-4 h-4 mr-2" />
+                    Actions
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="bg-slate-900 border-slate-700 text-white">
+                  <MobileActions />
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 animate-in slide-in-from-right-4 w-full sm:w-auto">
-            <Dialog open={isCreateColumnDialogOpen} onOpenChange={setIsCreateColumnDialogOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Column
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
-                <DialogHeader>
-                  <DialogTitle className="text-slate-100">Create New Column</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleCreateColumn} className="space-y-4">
-                  <div>
-                    <Label htmlFor="columnTitle" className="text-slate-300">
-                      Column Title
-                    </Label>
-                    <Input
-                      id="columnTitle"
-                      value={newColumnTitle}
-                      onChange={(e) => setNewColumnTitle(e.target.value)}
-                      placeholder="Enter column title"
-                      required
-                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-                    />
-                  </div>
-                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setIsCreateColumnDialogOpen(false)}
-                      className="hover:bg-slate-700 transition-colors w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors w-full sm:w-auto"
-                    >
-                      Create Column
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-
-            <Button
-              onClick={() => setIsCreateTaskDialogOpen(true)}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Task
-            </Button>
+          {/* Search Bar */}
+          <div className="animate-in slide-in-from-top-4" style={{ animationDelay: "300ms" }}>
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              filters={searchFilters}
+              onFiltersChange={setSearchFilters}
+              availableAssignees={availableAssignees}
+              availableCreators={availableCreators}
+              resultsCount={hasActiveSearch ? totalResults : undefined}
+            />
           </div>
-        </div>
 
-        {/* Search Bar */}
-        <div className="mb-6 animate-in slide-in-from-top-4" style={{ animationDelay: "300ms" }}>
-          <SearchBar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            filters={searchFilters}
-            onFiltersChange={setSearchFilters}
-            availableAssignees={availableAssignees}
-            availableCreators={availableCreators}
-            resultsCount={hasActiveSearch ? totalResults : undefined}
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
+          >
+            <div
+              className={`flex ${
+                isMobile ? "space-x-3" : "space-x-4 lg:space-x-6"
+              } overflow-x-auto pb-4 lg:pb-6 -mx-3 sm:-mx-4 lg:-mx-8 px-3 sm:px-4 lg:px-8 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800`}
+            >
+              <SortableContext items={columnsToShow.map((col) => col.id)} strategy={horizontalListSortingStrategy}>
+                {columnsToShow.map((column, index) => {
+                  const columnTasks = getColumnTasks(column.id)
+                  const isColumnFiltered =
+                    hasActiveSearch &&
+                    (column.title.toLowerCase().includes(searchQuery.toLowerCase()) || columnTasks.length > 0)
+
+                  return (
+                    <div
+                      key={column.id}
+                      className="animate-in slide-in-from-bottom-4 flex-shrink-0"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <TaskColumn
+                        column={column}
+                        tasks={columnTasks}
+                        onDeleteColumn={handleDeleteColumn}
+                        onCreateTask={(columnId) => {
+                          setSelectedColumnId(columnId)
+                          setIsCreateTaskDialogOpen(true)
+                        }}
+                        searchQuery={searchQuery}
+                        isFiltered={!hasActiveSearch || isColumnFiltered}
+                      />
+                    </div>
+                  )
+                })}
+              </SortableContext>
+
+              {columnsToShow.length === 0 && (
+                <div className="flex-1 flex items-center justify-center py-12 lg:py-16 animate-in fade-in-0 zoom-in-95">
+                  <div className="text-center px-4">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-2xl sm:text-3xl lg:text-4xl animate-bounce border border-slate-600">
+                      {hasActiveSearch ? "🔍" : "📋"}
+                    </div>
+                    <h3 className="text-base sm:text-lg font-medium text-slate-100 mb-2">
+                      {hasActiveSearch ? "No results found" : "No columns yet"}
+                    </h3>
+                    <p className="text-sm sm:text-base text-slate-400 mb-4">
+                      {hasActiveSearch
+                        ? "Try adjusting your search terms or filters"
+                        : "Create your first column to start organizing tasks"}
+                    </p>
+                    {!hasActiveSearch && (
+                      <Button
+                        onClick={() => setIsCreateColumnDialogOpen(true)}
+                        variant="outline"
+                        className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 border-slate-600 text-slate-300 hover:text-white w-full sm:w-auto"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Column
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DragOverlay>
+              {activeTask ? <TaskCard task={activeTask} isOverlay /> : null}
+            </DragOverlay>
+          </DndContext>
+
+          <CreateTaskDialog
+            isOpen={isCreateTaskDialogOpen}
+            onClose={() => {
+              setIsCreateTaskDialogOpen(false)
+              setSelectedColumnId("")
+            }}
+            boardId={boardId}
+            preselectedColumnId={selectedColumnId}
           />
         </div>
-
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragOver={handleDragOver}
-        >
-          <div
-            className={`flex ${isMobile ? "space-x-3" : "space-x-4 sm:space-x-6"} overflow-x-auto pb-4 sm:pb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8`}
-          >
-            <SortableContext items={columnsToShow.map((col) => col.id)} strategy={horizontalListSortingStrategy}>
-              {columnsToShow.map((column, index) => {
-                const columnTasks = getColumnTasks(column.id)
-                const isColumnFiltered =
-                  hasActiveSearch &&
-                  (column.title.toLowerCase().includes(searchQuery.toLowerCase()) || columnTasks.length > 0)
-
-                return (
-                  <div
-                    key={column.id}
-                    className="animate-in slide-in-from-bottom-4 flex-shrink-0"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <TaskColumn
-                      column={column}
-                      tasks={columnTasks}
-                      onDeleteColumn={handleDeleteColumn}
-                      onCreateTask={(columnId) => {
-                        setSelectedColumnId(columnId)
-                        setIsCreateTaskDialogOpen(true)
-                      }}
-                      searchQuery={searchQuery}
-                      isFiltered={!hasActiveSearch || isColumnFiltered}
-                    />
-                  </div>
-                )
-              })}
-            </SortableContext>
-
-            {columnsToShow.length === 0 && (
-              <div className="flex-1 flex items-center justify-center py-12 sm:py-16 animate-in fade-in-0 zoom-in-95">
-                <div className="text-center px-4">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-3xl sm:text-4xl animate-bounce border border-slate-600">
-                    {hasActiveSearch ? "🔍" : "📋"}
-                  </div>
-                  <h3 className="text-lg font-medium text-slate-100 mb-2">
-                    {hasActiveSearch ? "No results found" : "No columns yet"}
-                  </h3>
-                  <p className="text-sm sm:text-base text-slate-400 mb-4">
-                    {hasActiveSearch
-                      ? "Try adjusting your search terms or filters"
-                      : "Create your first column to start organizing tasks"}
-                  </p>
-                  {!hasActiveSearch && (
-                    <Button
-                      onClick={() => setIsCreateColumnDialogOpen(true)}
-                      variant="outline"
-                      className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 border-slate-600 text-slate-300 hover:text-white"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Column
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DragOverlay>
-            {activeTask ? <TaskCard task={activeTask} isOverlay searchQuery={searchQuery} /> : null}
-          </DragOverlay>
-        </DndContext>
-
-        <CreateTaskDialog
-          isOpen={isCreateTaskDialogOpen}
-          onClose={() => {
-            setIsCreateTaskDialogOpen(false)
-            setSelectedColumnId("")
-          }}
-          boardId={boardId}
-          preselectedColumnId={selectedColumnId}
-        />
       </div>
     </div>
   )
