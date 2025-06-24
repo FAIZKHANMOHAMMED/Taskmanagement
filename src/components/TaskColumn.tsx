@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, MoreHorizontal, Trash2, Edit } from 'lucide-react';
 import { useDroppable } from '@dnd-kit/core';
@@ -50,24 +49,27 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
     <>
       <Card 
         ref={setNodeRef} 
-        className={`w-72 sm:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl ${
-          isOver ? 'bg-blue-50 border-blue-300 shadow-lg scale-105' : 'bg-gray-50 border-gray-200'
-        }`}
+        className={`w-72 sm:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 ${
+          isOver 
+            ? 'bg-gradient-to-br from-slate-700 to-slate-800 border-blue-400 shadow-2xl scale-105 ring-2 ring-blue-400' 
+            : 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700'
+        } backdrop-blur-sm shadow-xl`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <CardHeader className="pb-3 px-3 sm:px-6">
+        <CardHeader className="pb-4 px-4 sm:px-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <h3 className={`font-semibold text-gray-900 transition-colors duration-200 truncate text-sm sm:text-base ${
-                isHovered ? 'text-blue-600' : ''
+            <div className="flex items-center space-x-3 min-w-0 flex-1">
+              <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex-shrink-0"></div>
+              <h3 className={`font-bold text-slate-100 transition-colors duration-200 truncate text-sm sm:text-base ${
+                isHovered ? 'text-blue-300' : ''
               }`}>
                 {column.title}
               </h3>
-              <span className={`text-xs px-2 py-1 rounded-full transition-all duration-200 shrink-0 ${
+              <span className={`text-xs px-2 py-1 rounded-full transition-all duration-200 shrink-0 font-medium ${
                 tasks.length > 0 
-                  ? 'bg-blue-100 text-blue-800 animate-pulse' 
-                  : 'bg-gray-200 text-gray-700'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white animate-pulse shadow-lg' 
+                  : 'bg-slate-700 text-slate-300'
               }`}>
                 {tasks.length}
               </span>
@@ -77,24 +79,24 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className={`transition-all duration-200 hover:bg-gray-200 hover:rotate-90 shrink-0 h-8 w-8 p-0 ${
+                  className={`transition-all duration-200 hover:bg-slate-700 hover:rotate-90 shrink-0 h-8 w-8 p-0 text-slate-400 hover:text-white ${
                     isHovered ? 'opacity-100' : 'opacity-70'
                   }`}
                 >
                   <MoreHorizontal className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white border shadow-lg animate-in slide-in-from-top-2 z-50">
+              <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700 text-white shadow-xl animate-in slide-in-from-top-2 z-50">
                 <DropdownMenuItem 
                   onClick={() => setIsEditDialogOpen(true)}
-                  className="hover:bg-blue-50 transition-colors"
+                  className="hover:bg-slate-700 focus:bg-slate-700 transition-colors"
                 >
                   <Edit className="w-4 h-4 mr-2" />
                   Edit Column
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onDeleteColumn(column.id)}
-                  className="text-red-600 focus:text-red-600 hover:bg-red-50 transition-colors"
+                  className="text-red-400 focus:text-red-300 hover:bg-red-900/20 focus:bg-red-900/20 transition-colors"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete Column
@@ -103,9 +105,9 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 min-h-[200px] px-3 sm:px-6">
+        <CardContent className="space-y-4 min-h-[200px] px-4 sm:px-6">
           <SortableContext items={tasks.map(task => task.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {tasks.map((task, index) => (
                 <div 
                   key={task.id}
@@ -119,19 +121,20 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
           </SortableContext>
           
           {tasks.length === 0 && (
-            <div className="flex items-center justify-center h-32 text-gray-400 animate-pulse">
+            <div className="flex items-center justify-center h-32 text-slate-400 animate-pulse">
               <div className="text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center text-lg sm:text-xl">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto mb-3 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-xl sm:text-2xl border border-slate-600">
                   📋
                 </div>
-                <p className="text-xs sm:text-sm">No tasks yet</p>
+                <p className="text-xs sm:text-sm font-medium">No tasks yet</p>
+                <p className="text-xs text-slate-500 mt-1">Drag tasks here or create new ones</p>
               </div>
             </div>
           )}
           
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 group border-2 border-dashed border-transparent hover:border-blue-300 text-sm"
+            className="w-full justify-start text-slate-400 hover:text-blue-300 hover:bg-slate-700/50 transition-all duration-200 group border-2 border-dashed border-slate-600 hover:border-blue-400 text-sm py-3"
             onClick={() => onCreateTask(column.id)}
           >
             <Plus className="w-4 h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
@@ -141,20 +144,20 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
       </Card>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95">
+        <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
           <DialogHeader>
-            <DialogTitle>Edit Column</DialogTitle>
+            <DialogTitle className="text-slate-100">Edit Column</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpdateColumn} className="space-y-4">
             <div>
-              <Label htmlFor="editColumnTitle">Column Title</Label>
+              <Label htmlFor="editColumnTitle" className="text-slate-300">Column Title</Label>
               <Input
                 id="editColumnTitle"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Enter column title"
                 required
-                className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+                className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
               />
             </div>
             <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
@@ -162,13 +165,13 @@ export const TaskColumn: React.FC<TaskColumnProps> = ({
                 type="button" 
                 variant="outline" 
                 onClick={() => setIsEditDialogOpen(false)}
-                className="hover:bg-gray-50 transition-colors w-full sm:w-auto"
+                className="hover:bg-slate-700 transition-colors w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 transition-colors w-full sm:w-auto"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors w-full sm:w-auto"
               >
                 Update Column
               </Button>

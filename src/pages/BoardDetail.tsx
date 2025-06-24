@@ -5,12 +5,12 @@ import {
   DndContext,
   DragEndEvent,
   DragOverEvent,
-  DragOverlay,
   DragStartEvent,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
+  DragOverlay,
 } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { Button } from '@/components/ui/button';
@@ -46,18 +46,16 @@ const BoardDetail = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: isMobile ? 8 : 3,
+        distance: isMobile ? 10 : 3,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: isMobile ? 100 : 0,
-        tolerance: isMobile ? 8 : 5,
+        delay: isMobile ? 150 : 0,
+        tolerance: isMobile ? 10 : 5,
       },
     })
   );
-
-  // ... keep existing code (boardId check, board and columns retrieval, board not found return)
 
   if (!boardId) {
     return <div>Board not found</div>;
@@ -68,15 +66,15 @@ const BoardDetail = () => {
 
   if (!board) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
         <div className="text-center animate-in fade-in-0 zoom-in-95 max-w-md mx-auto">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center text-3xl sm:text-4xl">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-3xl sm:text-4xl border border-slate-600">
             😔
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Board not found</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 mb-4">Board not found</h1>
           <Link 
             to="/" 
-            className="text-blue-600 hover:text-blue-800 transition-colors hover:underline text-sm sm:text-base"
+            className="text-blue-400 hover:text-blue-300 transition-colors hover:underline text-sm sm:text-base"
           >
             ← Back to Boards
           </Link>
@@ -84,8 +82,6 @@ const BoardDetail = () => {
       </div>
     );
   }
-
-  // ... keep existing code (handleCreateColumn, handleDeleteColumn functions)
 
   const handleCreateColumn = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,12 +93,18 @@ const BoardDetail = () => {
       });
       setNewColumnTitle('');
       setIsCreateColumnDialogOpen(false);
+      if (isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(25);
+      }
     }
   };
 
   const handleDeleteColumn = (columnId: string) => {
     if (window.confirm('Are you sure you want to delete this column? All tasks in this column will also be deleted.')) {
       deleteColumn(columnId);
+      if (isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
     }
   };
 
@@ -150,8 +152,6 @@ const BoardDetail = () => {
     }
   };
 
-  // ... keep existing code (handleDragOver function and return statement)
-
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
@@ -174,23 +174,23 @@ const BoardDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 animate-in fade-in-0">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 animate-in fade-in-0">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 space-y-4 sm:space-y-0 animate-in slide-in-from-top-4">
           <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
             <Link
               to="/"
-              className="flex items-center text-gray-600 hover:text-blue-600 transition-all duration-200 hover:scale-105 group text-sm sm:text-base self-start"
+              className="flex items-center text-slate-400 hover:text-blue-400 transition-all duration-200 hover:scale-105 group text-sm sm:text-base self-start"
             >
               <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
               Back to Boards
             </Link>
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent truncate">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-100 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
                 {board.title}
               </h1>
               {board.description && (
-                <p className="text-sm sm:text-base text-gray-600 mt-1 animate-in slide-in-from-left-2 line-clamp-2" style={{ animationDelay: '200ms' }}>
+                <p className="text-sm sm:text-base text-slate-400 mt-1 animate-in slide-in-from-left-2 line-clamp-2" style={{ animationDelay: '200ms' }}>
                   {board.description}
                 </p>
               )}
@@ -202,26 +202,26 @@ const BoardDetail = () => {
               <DialogTrigger asChild>
                 <Button 
                   variant="outline"
-                  className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105 w-full sm:w-auto"
+                  className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Add Column
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95">
+              <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
                 <DialogHeader>
-                  <DialogTitle>Create New Column</DialogTitle>
+                  <DialogTitle className="text-slate-100">Create New Column</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleCreateColumn} className="space-y-4">
                   <div>
-                    <Label htmlFor="columnTitle">Column Title</Label>
+                    <Label htmlFor="columnTitle" className="text-slate-300">Column Title</Label>
                     <Input
                       id="columnTitle"
                       value={newColumnTitle}
                       onChange={(e) => setNewColumnTitle(e.target.value)}
                       placeholder="Enter column title"
                       required
-                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+                      className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
                     />
                   </div>
                   <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
@@ -229,13 +229,13 @@ const BoardDetail = () => {
                       type="button" 
                       variant="outline" 
                       onClick={() => setIsCreateColumnDialogOpen(false)}
-                      className="hover:bg-gray-50 transition-colors w-full sm:w-auto"
+                      className="hover:bg-slate-700 transition-colors w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
                     >
                       Cancel
                     </Button>
                     <Button 
                       type="submit"
-                      className="bg-blue-600 hover:bg-blue-700 transition-colors w-full sm:w-auto"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors w-full sm:w-auto"
                     >
                       Create Column
                     </Button>
@@ -283,15 +283,15 @@ const BoardDetail = () => {
             {columns.length === 0 && (
               <div className="flex-1 flex items-center justify-center py-12 sm:py-16 animate-in fade-in-0 zoom-in-95">
                 <div className="text-center px-4">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center text-3xl sm:text-4xl animate-bounce">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-3xl sm:text-4xl animate-bounce border border-slate-600">
                     📋
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No columns yet</h3>
-                  <p className="text-sm sm:text-base text-gray-500 mb-4">Create your first column to start organizing tasks</p>
+                  <h3 className="text-lg font-medium text-slate-100 mb-2">No columns yet</h3>
+                  <p className="text-sm sm:text-base text-slate-400 mb-4">Create your first column to start organizing tasks</p>
                   <Button 
                     onClick={() => setIsCreateColumnDialogOpen(true)} 
                     variant="outline"
-                    className="hover:bg-blue-50 hover:border-blue-300 transition-all duration-200 hover:scale-105"
+                    className="hover:bg-slate-700 hover:border-blue-400 transition-all duration-200 hover:scale-105 border-slate-600 text-slate-300 hover:text-white"
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     Add Column
