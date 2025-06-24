@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Calendar, User, MoreHorizontal, Edit, Trash2 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
@@ -10,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Task, useTaskStore } from '@/store/taskStore';
 import { format } from 'date-fns';
 import { EditTaskDialog } from './EditTaskDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface TaskCardProps {
   task: Task;
@@ -20,6 +20,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isOverlay = false }) =
   const { deleteTask } = useTaskStore();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const isMobile = useIsMobile();
 
   const {
     attributes,
@@ -42,6 +43,8 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isOverlay = false }) =
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
+
+  // ... keep existing code (getPriorityColor function, handleDeleteTask function, isOverdue calculation)
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -71,17 +74,23 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isOverlay = false }) =
         style={style}
         {...attributes}
         {...listeners}
-        className={`bg-white border cursor-grab active:cursor-grabbing transition-all duration-300 group ${
+        className={`bg-white border transition-all duration-300 group ${
+          isMobile 
+            ? 'cursor-grab active:cursor-grabbing touch-manipulation' 
+            : 'cursor-grab active:cursor-grabbing'
+        } ${
           isOverlay ? 'rotate-5 shadow-2xl scale-110' : 'hover:shadow-lg hover:-translate-y-1'
-        } ${isDragging ? 'z-50' : ''} ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}
+        } ${isDragging ? 'z-50' : ''} ${isOverdue ? 'border-l-4 border-l-red-500' : ''} ${
+          isMobile ? 'min-h-[120px]' : ''
+        }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <CardHeader className="pb-2">
+        <CardHeader className={`pb-2 ${isMobile ? 'px-3 py-3' : ''}`}>
           <div className="flex items-start justify-between">
-            <h4 className={`font-medium text-gray-900 text-sm leading-tight transition-colors duration-200 ${
-              isHovered ? 'text-blue-600' : ''
-            }`}>
+            <h4 className={`font-medium text-gray-900 leading-tight transition-colors duration-200 ${
+              isMobile ? 'text-sm' : 'text-sm'
+            } ${isHovered ? 'text-blue-600' : ''}`}>
               {task.title}
             </h4>
             {!isOverlay && (
@@ -90,11 +99,11 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isOverlay = false }) =
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`h-6 w-6 p-0 transition-all duration-200 hover:bg-gray-100 hover:rotate-90 ${
-                      isHovered ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                    }`}
+                    className={`transition-all duration-200 hover:bg-gray-100 hover:rotate-90 ${
+                      isMobile ? 'h-8 w-8 p-0' : 'h-6 w-6 p-0'
+                    } ${isHovered || isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                   >
-                    <MoreHorizontal className="w-3 h-3" />
+                    <MoreHorizontal className={`${isMobile ? 'w-4 h-4' : 'w-3 h-3'}`} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white border shadow-lg animate-in slide-in-from-top-2">
@@ -117,12 +126,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, isOverlay = false }) =
             )}
           </div>
           {task.description && (
-            <p className="text-xs text-gray-600 line-clamp-2 mt-1 transition-colors duration-200 hover:text-gray-800">
+            <p className={`text-gray-600 line-clamp-2 mt-1 transition-colors duration-200 hover:text-gray-800 ${
+              isMobile ? 'text-xs' : 'text-xs'
+            }`}>
               {task.description}
             </p>
           )}
         </CardHeader>
-        <CardContent className="pt-0 space-y-2">
+        <CardContent className={`pt-0 space-y-2 ${isMobile ? 'px-3 pb-3' : ''}`}>
           <div className="flex items-center justify-between">
             <Badge className={`text-xs px-2 py-0.5 transition-all duration-200 hover:shadow-md ${getPriorityColor(task.priority)}`}>
               {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}

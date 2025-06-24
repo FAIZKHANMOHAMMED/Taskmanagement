@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, MoreHorizontal, Trash2, Edit } from 'lucide-react';
@@ -9,6 +8,7 @@ import {
   DragOverlay,
   DragStartEvent,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -21,9 +21,11 @@ import { useTaskStore, Task } from '@/store/taskStore';
 import { TaskColumn } from '@/components/TaskColumn';
 import { TaskCard } from '@/components/TaskCard';
 import { CreateTaskDialog } from '@/components/CreateTaskDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const BoardDetail = () => {
   const { boardId } = useParams<{ boardId: string }>();
+  const isMobile = useIsMobile();
   const {
     getBoardById,
     getColumnsByBoardId,
@@ -44,10 +46,18 @@ const BoardDetail = () => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3,
+        distance: isMobile ? 8 : 3,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: isMobile ? 100 : 0,
+        tolerance: isMobile ? 8 : 5,
       },
     })
   );
+
+  // ... keep existing code (boardId check, board and columns retrieval, board not found return)
 
   if (!boardId) {
     return <div>Board not found</div>;
@@ -75,6 +85,8 @@ const BoardDetail = () => {
     );
   }
 
+  // ... keep existing code (handleCreateColumn, handleDeleteColumn functions)
+
   const handleCreateColumn = (e: React.FormEvent) => {
     e.preventDefault();
     if (newColumnTitle.trim()) {
@@ -98,6 +110,11 @@ const BoardDetail = () => {
     const { active } = event;
     if (active.data.current?.type === 'task') {
       setActiveTask(active.data.current.task);
+      
+      // Add haptic feedback for mobile devices
+      if (isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(50);
+      }
     }
   };
 
@@ -125,8 +142,15 @@ const BoardDetail = () => {
         const overIndex = overTasks.findIndex(task => task.id === overTask.id);
         moveTask(activeTaskId, activeColumnId, overColumnId, overIndex);
       }
+
+      // Add success haptic feedback for mobile
+      if (isMobile && 'vibrate' in navigator) {
+        navigator.vibrate(25);
+      }
     }
   };
+
+  // ... keep existing code (handleDragOver function and return statement)
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
@@ -236,7 +260,7 @@ const BoardDetail = () => {
           onDragEnd={handleDragEnd}
           onDragOver={handleDragOver}
         >
-          <div className="flex space-x-4 sm:space-x-6 overflow-x-auto pb-4 sm:pb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+          <div className={`flex ${isMobile ? 'space-x-3' : 'space-x-4 sm:space-x-6'} overflow-x-auto pb-4 sm:pb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8`}>
             <SortableContext items={columns.map(col => col.id)} strategy={horizontalListSortingStrategy}>
               {columns.map((column, index) => (
                 <div 
