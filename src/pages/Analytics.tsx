@@ -7,7 +7,17 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, TrendingUp, Users, Calendar, CheckCircle, Clock, AlertTriangle, Download, ArrowLeft } from 'lucide-react'
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Calendar,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Download,
+  ArrowLeft,
+} from "lucide-react"
 import { useTaskStore } from "@/store/taskStore"
 import { useNavigate } from "react-router-dom"
 
@@ -103,32 +113,82 @@ export const Analytics: React.FC = () => {
     .slice(0, 10)
 
   const exportData = () => {
-    const analyticsData = {
-      timeRange,
-      metrics: {
-        totalTasks,
-        completedTasks,
-        inProgressTasks,
-        todoTasks,
-        overdueTasks,
-        completionRate,
-      },
-      priorityDistribution: {
-        high: highPriorityTasks,
-        medium: mediumPriorityTasks,
-        low: lowPriorityTasks,
-      },
-      teamPerformance,
-      projectPerformance,
-      recentActivity,
-      generatedAt: new Date().toISOString(),
+    // Create CSV content for Excel compatibility
+    const csvContent = []
+
+    // Add header
+    csvContent.push("TaskFlow Analytics Report")
+    csvContent.push(`Generated: ${new Date().toLocaleString()}`)
+    csvContent.push(`Time Range: ${timeRange}`)
+    csvContent.push("")
+
+    // Key Metrics
+    csvContent.push("KEY METRICS")
+    csvContent.push("Metric,Value")
+    csvContent.push(`Total Tasks,${totalTasks}`)
+    csvContent.push(`Completed Tasks,${completedTasks}`)
+    csvContent.push(`In Progress Tasks,${inProgressTasks}`)
+    csvContent.push(`Todo Tasks,${todoTasks}`)
+    csvContent.push(`Overdue Tasks,${overdueTasks}`)
+    csvContent.push(`Completion Rate,${completionRate}%`)
+    csvContent.push("")
+
+    // Priority Distribution
+    csvContent.push("PRIORITY DISTRIBUTION")
+    csvContent.push("Priority,Count,Percentage")
+    csvContent.push(
+      `High Priority,${highPriorityTasks},${totalTasks > 0 ? Math.round((highPriorityTasks / totalTasks) * 100) : 0}%`,
+    )
+    csvContent.push(
+      `Medium Priority,${mediumPriorityTasks},${totalTasks > 0 ? Math.round((mediumPriorityTasks / totalTasks) * 100) : 0}%`,
+    )
+    csvContent.push(
+      `Low Priority,${lowPriorityTasks},${totalTasks > 0 ? Math.round((lowPriorityTasks / totalTasks) * 100) : 0}%`,
+    )
+    csvContent.push("")
+
+    // Status Distribution
+    csvContent.push("STATUS DISTRIBUTION")
+    csvContent.push("Status,Count,Percentage")
+    csvContent.push(
+      `Completed,${completedTasks},${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%`,
+    )
+    csvContent.push(
+      `In Progress,${inProgressTasks},${totalTasks > 0 ? Math.round((inProgressTasks / totalTasks) * 100) : 0}%`,
+    )
+    csvContent.push(`Todo,${todoTasks},${totalTasks > 0 ? Math.round((todoTasks / totalTasks) * 100) : 0}%`)
+    csvContent.push("")
+
+    // Team Performance
+    if (teamPerformance.length > 0) {
+      csvContent.push("TEAM PERFORMANCE")
+      csvContent.push("Team Member,Total Tasks,Completed Tasks,Completion Rate")
+      teamPerformance.forEach((member) => {
+        csvContent.push(`${member.name},${member.totalTasks},${member.completedTasks},${member.completionRate}%`)
+      })
+      csvContent.push("")
     }
 
-    const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: "application/json" })
+    // Recent Activity
+    if (recentActivity.length > 0) {
+      csvContent.push("RECENT ACTIVITY")
+      csvContent.push("Task Title,Assignee,Status,Due Date")
+      recentActivity.forEach((task) => {
+        const statusText =
+          task.status === "in-progress" ? "In Progress" : task.status === "todo" ? "To Do" : "Completed"
+        csvContent.push(`"${task.title}",${task.assignee},${statusText},${new Date(task.dueDate).toLocaleDateString()}`)
+      })
+    }
+
+    // Convert to CSV format
+    const csvString = csvContent.join("\n")
+
+    // Create and download file
+    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `task-analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.json`
+    a.download = `TaskFlow-Analytics-${timeRange}-${new Date().toISOString().split("T")[0]}.csv`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -141,10 +201,10 @@ export const Analytics: React.FC = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate("/")} 
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
               className="text-slate-400 hover:text-white self-start"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
@@ -172,7 +232,7 @@ export const Analytics: React.FC = () => {
 
             <Button onClick={exportData} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Download className="w-4 h-4 mr-2" />
-              Export Data
+              Export to Excel
             </Button>
           </div>
         </div>
@@ -339,7 +399,10 @@ export const Analytics: React.FC = () => {
             <CardContent>
               <div className="space-y-3 sm:space-y-4">
                 {teamPerformance.slice(0, 10).map((member, index) => (
-                  <div key={member.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3">
+                  <div
+                    key={member.name}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
                         {member.name.charAt(0).toUpperCase()}
@@ -378,7 +441,10 @@ export const Analytics: React.FC = () => {
             <CardContent>
               <div className="space-y-3">
                 {recentActivity.map((task) => (
-                  <div key={task.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3">
+                  <div
+                    key={task.id}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3"
+                  >
                     <div className="flex-1 min-w-0">
                       <p className="text-white font-medium text-sm sm:text-base truncate">{task.title}</p>
                       <p className="text-slate-400 text-xs sm:text-sm">Assigned to {task.assignee}</p>
@@ -395,7 +461,9 @@ export const Analytics: React.FC = () => {
                       >
                         {task.status === "in-progress" ? "In Progress" : task.status === "todo" ? "To Do" : "Completed"}
                       </Badge>
-                      <span className="text-slate-400 text-xs sm:text-sm">{new Date(task.dueDate).toLocaleDateString()}</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">
+                        {new Date(task.dueDate).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 ))}
