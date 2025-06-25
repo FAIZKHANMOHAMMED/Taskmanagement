@@ -131,8 +131,8 @@ const TeamSettings = () => {
       {/* Header */}
       <div className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
               <Link to="/" className="flex items-center text-slate-400 hover:text-blue-400 transition-colors">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Dashboard
@@ -142,19 +142,19 @@ const TeamSettings = () => {
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-white">Team Settings</h1>
+                  <h1 className="text-lg sm:text-xl font-bold text-white">Team Settings</h1>
                   <p className="text-xs text-slate-400">Manage your team and workspace</p>
                 </div>
               </div>
             </div>
             <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full sm:w-auto">
                   <UserPlus className="w-4 h-4 mr-2" />
                   Invite Member
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700 text-white">
+              <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700 text-white mx-4">
                 <DialogHeader>
                   <DialogTitle className="text-white">Invite Team Member</DialogTitle>
                 </DialogHeader>
@@ -191,18 +191,18 @@ const TeamSettings = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex justify-end space-x-3 pt-4">
+                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={() => setIsInviteDialogOpen(false)}
-                      className="border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700"
+                      className="border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700 w-full sm:w-auto"
                     >
                       Cancel
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 w-full sm:w-auto"
                     >
                       Send Invitation
                     </Button>
@@ -214,34 +214,42 @@ const TeamSettings = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <Tabs defaultValue="members" className="space-y-6">
-          <TabsList className="bg-slate-800 border-slate-700">
-            <TabsTrigger value="members" className="text-slate-300 data-[state=active]:text-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <Tabs defaultValue="members" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-slate-800 border-slate-700 w-full sm:w-auto">
+            <TabsTrigger value="members" className="text-slate-300 data-[state=active]:text-white text-xs sm:text-sm">
               Team Members
             </TabsTrigger>
-            <TabsTrigger value="settings" className="text-slate-300 data-[state=active]:text-white">
+            <TabsTrigger value="settings" className="text-slate-300 data-[state=active]:text-white text-xs sm:text-sm">
               Workspace Settings
             </TabsTrigger>
-            <TabsTrigger value="permissions" className="text-slate-300 data-[state=active]:text-white">
+            <TabsTrigger
+              value="permissions"
+              className="text-slate-300 data-[state=active]:text-white text-xs sm:text-sm"
+            >
               Permissions
             </TabsTrigger>
           </TabsList>
 
           {/* Team Members Tab */}
-          <TabsContent value="members" className="space-y-6">
+          <TabsContent value="members" className="space-y-4 sm:space-y-6">
             <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Team Members ({teamMembers.length})</CardTitle>
-                <CardDescription className="text-slate-400">Manage your team members and their roles</CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-white text-lg sm:text-xl">Team Members ({teamMembers.length})</CardTitle>
+                <CardDescription className="text-slate-400 text-sm">
+                  Manage your team members and their roles
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {teamMembers.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="w-10 h-10">
-                          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                    <div
+                      key={member.id}
+                      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 bg-slate-700/50 rounded-lg gap-3"
+                    >
+                      <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
+                        <Avatar className="w-8 h-8 sm:w-10 sm:h-10 shrink-0">
+                          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs sm:text-sm">
                             {member.name
                               .split(" ")
                               .map((n) => n[0])
@@ -249,24 +257,24 @@ const TeamSettings = () => {
                               .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <h4 className="font-semibold text-white">{member.name}</h4>
-                            <Badge className={`text-xs ${getRoleColor(member.role)}`}>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+                            <h4 className="font-semibold text-white text-sm sm:text-base truncate">{member.name}</h4>
+                            <Badge className={`text-xs ${getRoleColor(member.role)} w-fit`}>
                               {getRoleIcon(member.role)}
                               <span className="ml-1">{member.role}</span>
                             </Badge>
                           </div>
-                          <p className="text-sm text-slate-400">{member.email}</p>
-                          <div className="flex items-center space-x-4 text-xs text-slate-500 mt-1">
+                          <p className="text-xs sm:text-sm text-slate-400 truncate">{member.email}</p>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs text-slate-500 mt-1">
                             <span>Joined {format(new Date(member.joinedAt), "MMM dd, yyyy")}</span>
-                            <span>•</span>
+                            <span className="hidden sm:inline">•</span>
                             <span>Last active {format(new Date(member.lastActive), "MMM dd")}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
+                      <div className="flex items-center justify-between sm:justify-end space-x-3 sm:space-x-4 w-full sm:w-auto">
+                        <div className="text-left sm:text-right">
                           <p className="text-sm text-white">
                             {member.tasksCompleted}/{member.tasksAssigned}
                           </p>
@@ -274,35 +282,35 @@ const TeamSettings = () => {
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+                            <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white h-8 w-8 p-0">
                               <MoreHorizontal className="w-4 h-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
                             <DropdownMenuItem
                               onClick={() => handleRoleChange(member.id, "admin")}
-                              className="hover:bg-slate-700"
+                              className="hover:bg-slate-700 text-xs sm:text-sm"
                             >
                               <Crown className="w-4 h-4 mr-2" />
                               Make Admin
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleRoleChange(member.id, "member")}
-                              className="hover:bg-slate-700"
+                              className="hover:bg-slate-700 text-xs sm:text-sm"
                             >
                               <Users className="w-4 h-4 mr-2" />
                               Make Member
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleRoleChange(member.id, "viewer")}
-                              className="hover:bg-slate-700"
+                              className="hover:bg-slate-700 text-xs sm:text-sm"
                             >
                               <Shield className="w-4 h-4 mr-2" />
                               Make Viewer
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleRemoveMember(member.id)}
-                              className="text-red-400 hover:bg-red-900/20"
+                              className="text-red-400 hover:bg-red-900/20 text-xs sm:text-sm"
                             >
                               <Trash2 className="w-4 h-4 mr-2" />
                               Remove Member
@@ -318,41 +326,41 @@ const TeamSettings = () => {
           </TabsContent>
 
           {/* Workspace Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="settings" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <Settings className="w-5 h-5 mr-2" />
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-white flex items-center text-lg sm:text-xl">
+                    <Settings className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     General Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="teamName" className="text-slate-300">
+                    <Label htmlFor="teamName" className="text-slate-300 text-sm">
                       Team Name
                     </Label>
                     <Input
                       id="teamName"
                       value={teamSettings.teamName}
                       onChange={(e) => setTeamSettings((prev) => ({ ...prev, teamName: e.target.value }))}
-                      className="bg-slate-700 border-slate-600 text-white"
+                      className="bg-slate-700 border-slate-600 text-white text-sm"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="description" className="text-slate-300">
+                    <Label htmlFor="description" className="text-slate-300 text-sm">
                       Description
                     </Label>
                     <Textarea
                       id="description"
                       value={teamSettings.description}
                       onChange={(e) => setTeamSettings((prev) => ({ ...prev, description: e.target.value }))}
-                      className="bg-slate-700 border-slate-600 text-white"
+                      className="bg-slate-700 border-slate-600 text-white text-sm"
                       rows={3}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="timezone" className="text-slate-300">
+                    <Label htmlFor="timezone" className="text-slate-300 text-sm">
                       Timezone
                     </Label>
                     <Select
@@ -371,31 +379,31 @@ const TeamSettings = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="workingHours" className="text-slate-300">
+                    <Label htmlFor="workingHours" className="text-slate-300 text-sm">
                       Working Hours
                     </Label>
                     <Input
                       id="workingHours"
                       value={teamSettings.workingHours}
                       onChange={(e) => setTeamSettings((prev) => ({ ...prev, workingHours: e.target.value }))}
-                      className="bg-slate-700 border-slate-600 text-white"
+                      className="bg-slate-700 border-slate-600 text-white text-sm"
                     />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <Bell className="w-5 h-5 mr-2" />
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-white flex items-center text-lg sm:text-xl">
+                    <Bell className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Notification Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-slate-300">Email Notifications</Label>
-                      <p className="text-sm text-slate-400">Receive notifications via email</p>
+                      <Label className="text-slate-300 text-sm">Email Notifications</Label>
+                      <p className="text-xs text-slate-400">Receive notifications via email</p>
                     </div>
                     <Switch
                       checked={teamSettings.notifications.emailNotifications}
@@ -409,8 +417,8 @@ const TeamSettings = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-slate-300">Task Deadlines</Label>
-                      <p className="text-sm text-slate-400">Notify about upcoming deadlines</p>
+                      <Label className="text-slate-300 text-sm">Task Deadlines</Label>
+                      <p className="text-xs text-slate-400">Notify about upcoming deadlines</p>
                     </div>
                     <Switch
                       checked={teamSettings.notifications.taskDeadlines}
@@ -424,8 +432,8 @@ const TeamSettings = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-slate-300">Project Updates</Label>
-                      <p className="text-sm text-slate-400">Notify about project changes</p>
+                      <Label className="text-slate-300 text-sm">Project Updates</Label>
+                      <p className="text-xs text-slate-400">Notify about project changes</p>
                     </div>
                     <Switch
                       checked={teamSettings.notifications.projectUpdates}
@@ -439,8 +447,8 @@ const TeamSettings = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <div>
-                      <Label className="text-slate-300">Weekly Reports</Label>
-                      <p className="text-sm text-slate-400">Receive weekly progress reports</p>
+                      <Label className="text-slate-300 text-sm">Weekly Reports</Label>
+                      <p className="text-xs text-slate-400">Receive weekly progress reports</p>
                     </div>
                     <Switch
                       checked={teamSettings.notifications.weeklyReports}
@@ -457,7 +465,7 @@ const TeamSettings = () => {
             </div>
 
             <div className="flex justify-end">
-              <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700">
+              <Button className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 w-full sm:w-auto">
                 <Save className="w-4 h-4 mr-2" />
                 Save Settings
               </Button>
@@ -465,22 +473,22 @@ const TeamSettings = () => {
           </TabsContent>
 
           {/* Permissions Tab */}
-          <TabsContent value="permissions" className="space-y-6">
+          <TabsContent value="permissions" className="space-y-4 sm:space-y-6">
             <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <Shield className="w-5 h-5 mr-2" />
+              <CardHeader className="pb-4">
+                <CardTitle className="text-white flex items-center text-lg sm:text-xl">
+                  <Shield className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Access Permissions
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-slate-400 text-sm">
                   Control who can access and modify your workspace
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-300">Allow Guest Access</Label>
-                    <p className="text-sm text-slate-400">Allow non-team members to view public projects</p>
+                    <Label className="text-slate-300 text-sm">Allow Guest Access</Label>
+                    <p className="text-xs text-slate-400">Allow non-team members to view public projects</p>
                   </div>
                   <Switch
                     checked={teamSettings.permissions.allowGuestAccess}
@@ -494,8 +502,8 @@ const TeamSettings = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-300">Require Approval</Label>
-                    <p className="text-sm text-slate-400">New members need admin approval to join</p>
+                    <Label className="text-slate-300 text-sm">Require Approval</Label>
+                    <p className="text-xs text-slate-400">New members need admin approval to join</p>
                   </div>
                   <Switch
                     checked={teamSettings.permissions.requireApproval}
@@ -509,8 +517,8 @@ const TeamSettings = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <Label className="text-slate-300">Allow File Sharing</Label>
-                    <p className="text-sm text-slate-400">Members can upload and share files</p>
+                    <Label className="text-slate-300 text-sm">Allow File Sharing</Label>
+                    <p className="text-xs text-slate-400">Members can upload and share files</p>
                   </div>
                   <Switch
                     checked={teamSettings.permissions.allowFileSharing}
@@ -526,42 +534,44 @@ const TeamSettings = () => {
             </Card>
 
             <Card className="bg-slate-800/50 border-slate-700">
-              <CardHeader>
-                <CardTitle className="text-white">Role Permissions</CardTitle>
-                <CardDescription className="text-slate-400">What each role can do in your workspace</CardDescription>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-white text-lg sm:text-xl">Role Permissions</CardTitle>
+                <CardDescription className="text-slate-400 text-sm">
+                  What each role can do in your workspace
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-slate-700/50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="p-3 sm:p-4 bg-slate-700/50 rounded-lg">
                     <div className="flex items-center space-x-2 mb-3">
                       <Crown className="w-4 h-4 text-purple-400" />
-                      <h4 className="font-semibold text-white">Admin</h4>
+                      <h4 className="font-semibold text-white text-sm sm:text-base">Admin</h4>
                     </div>
-                    <ul className="text-sm text-slate-300 space-y-1">
+                    <ul className="text-xs sm:text-sm text-slate-300 space-y-1">
                       <li>• Full workspace access</li>
                       <li>• Manage team members</li>
                       <li>• Delete projects</li>
                       <li>• Change settings</li>
                     </ul>
                   </div>
-                  <div className="p-4 bg-slate-700/50 rounded-lg">
+                  <div className="p-3 sm:p-4 bg-slate-700/50 rounded-lg">
                     <div className="flex items-center space-x-2 mb-3">
                       <Users className="w-4 h-4 text-blue-400" />
-                      <h4 className="font-semibold text-white">Member</h4>
+                      <h4 className="font-semibold text-white text-sm sm:text-base">Member</h4>
                     </div>
-                    <ul className="text-sm text-slate-300 space-y-1">
+                    <ul className="text-xs sm:text-sm text-slate-300 space-y-1">
                       <li>• Create projects</li>
                       <li>• Edit tasks</li>
                       <li>• Comment on tasks</li>
                       <li>• Upload files</li>
                     </ul>
                   </div>
-                  <div className="p-4 bg-slate-700/50 rounded-lg">
+                  <div className="p-3 sm:p-4 bg-slate-700/50 rounded-lg">
                     <div className="flex items-center space-x-2 mb-3">
                       <Shield className="w-4 h-4 text-gray-400" />
-                      <h4 className="font-semibold text-white">Viewer</h4>
+                      <h4 className="font-semibold text-white text-sm sm:text-base">Viewer</h4>
                     </div>
-                    <ul className="text-sm text-slate-300 space-y-1">
+                    <ul className="text-xs sm:text-sm text-slate-300 space-y-1">
                       <li>• View projects</li>
                       <li>• View tasks</li>
                       <li>• Export data</li>

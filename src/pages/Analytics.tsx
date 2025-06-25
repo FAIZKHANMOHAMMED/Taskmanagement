@@ -7,17 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  BarChart3,
-  TrendingUp,
-  Users,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Download,
-  ArrowLeft,
-} from "lucide-react"
+import { BarChart3, TrendingUp, Users, Calendar, CheckCircle, Clock, AlertTriangle, Download, ArrowLeft } from 'lucide-react'
 import { useTaskStore } from "@/store/taskStore"
 import { useNavigate } from "react-router-dom"
 
@@ -147,25 +137,30 @@ export const Analytics: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-slate-400 hover:text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate("/")} 
+              className="text-slate-400 hover:text-white self-start"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 Analytics Dashboard
               </h1>
-              <p className="text-slate-400 mt-1">Track your productivity and team performance</p>
+              <p className="text-slate-400 mt-1 text-sm sm:text-base">Track your productivity and team performance</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-40 bg-slate-800 border-slate-700 text-white">
+              <SelectTrigger className="w-full sm:w-40 bg-slate-800 border-slate-700 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-white">
@@ -175,7 +170,7 @@ export const Analytics: React.FC = () => {
               </SelectContent>
             </Select>
 
-            <Button onClick={exportData} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={exportData} className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto">
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
@@ -183,82 +178,82 @@ export const Analytics: React.FC = () => {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Total Tasks</p>
-                  <p className="text-2xl font-bold text-white">{totalTasks}</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">Total Tasks</p>
+                  <p className="text-xl sm:text-2xl font-bold text-white">{totalTasks}</p>
                 </div>
-                <BarChart3 className="w-8 h-8 text-blue-400" />
+                <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Completed</p>
-                  <p className="text-2xl font-bold text-green-400">{completedTasks}</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">Completed</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-400">{completedTasks}</p>
                 </div>
-                <CheckCircle className="w-8 h-8 text-green-400" />
+                <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">In Progress</p>
-                  <p className="text-2xl font-bold text-blue-400">{inProgressTasks}</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">In Progress</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-400">{inProgressTasks}</p>
                 </div>
-                <Clock className="w-8 h-8 text-blue-400" />
+                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Completion Rate</p>
-                  <p className="text-2xl font-bold text-purple-400">{completionRate}%</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">Completion Rate</p>
+                  <p className="text-xl sm:text-2xl font-bold text-purple-400">{completionRate}%</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-purple-400" />
+                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-400 text-sm">Overdue</p>
-                  <p className="text-2xl font-bold text-red-400">{overdueTasks}</p>
+                  <p className="text-slate-400 text-xs sm:text-sm">Overdue</p>
+                  <p className="text-xl sm:text-2xl font-bold text-red-400">{overdueTasks}</p>
                 </div>
-                <AlertTriangle className="w-8 h-8 text-red-400" />
+                <AlertTriangle className="w-6 h-6 sm:w-8 sm:h-8 text-red-400" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
           {/* Priority Distribution */}
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
                 Priority Distribution
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">High Priority</span>
-                  <Badge className="bg-red-500/20 text-red-400">{highPriorityTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">High Priority</span>
+                  <Badge className="bg-red-500/20 text-red-400 text-xs sm:text-sm">{highPriorityTasks}</Badge>
                 </div>
                 <Progress
                   value={totalTasks > 0 ? (highPriorityTasks / totalTasks) * 100 : 0}
@@ -268,8 +263,8 @@ export const Analytics: React.FC = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Medium Priority</span>
-                  <Badge className="bg-yellow-500/20 text-yellow-400">{mediumPriorityTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">Medium Priority</span>
+                  <Badge className="bg-yellow-500/20 text-yellow-400 text-xs sm:text-sm">{mediumPriorityTasks}</Badge>
                 </div>
                 <Progress
                   value={totalTasks > 0 ? (mediumPriorityTasks / totalTasks) * 100 : 0}
@@ -279,8 +274,8 @@ export const Analytics: React.FC = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Low Priority</span>
-                  <Badge className="bg-green-500/20 text-green-400">{lowPriorityTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">Low Priority</span>
+                  <Badge className="bg-green-500/20 text-green-400 text-xs sm:text-sm">{lowPriorityTasks}</Badge>
                 </div>
                 <Progress
                   value={totalTasks > 0 ? (lowPriorityTasks / totalTasks) * 100 : 0}
@@ -292,17 +287,17 @@ export const Analytics: React.FC = () => {
 
           {/* Status Distribution */}
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                 Status Distribution
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">Completed</span>
-                  <Badge className="bg-green-500/20 text-green-400">{completedTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">Completed</span>
+                  <Badge className="bg-green-500/20 text-green-400 text-xs sm:text-sm">{completedTasks}</Badge>
                 </div>
                 <Progress
                   value={totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}
@@ -312,8 +307,8 @@ export const Analytics: React.FC = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">In Progress</span>
-                  <Badge className="bg-blue-500/20 text-blue-400">{inProgressTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">In Progress</span>
+                  <Badge className="bg-blue-500/20 text-blue-400 text-xs sm:text-sm">{inProgressTasks}</Badge>
                 </div>
                 <Progress
                   value={totalTasks > 0 ? (inProgressTasks / totalTasks) * 100 : 0}
@@ -323,8 +318,8 @@ export const Analytics: React.FC = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-300">To Do</span>
-                  <Badge className="bg-gray-500/20 text-gray-400">{todoTasks}</Badge>
+                  <span className="text-slate-300 text-sm sm:text-base">To Do</span>
+                  <Badge className="bg-gray-500/20 text-gray-400 text-xs sm:text-sm">{todoTasks}</Badge>
                 </div>
                 <Progress value={totalTasks > 0 ? (todoTasks / totalTasks) * 100 : 0} className="h-2 bg-slate-700" />
               </div>
@@ -334,33 +329,33 @@ export const Analytics: React.FC = () => {
 
         {/* Team Performance */}
         {teamPerformance.length > 0 && (
-          <Card className="bg-slate-800/50 border-slate-700 mb-8">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Users className="w-5 h-5" />
+          <Card className="bg-slate-800/50 border-slate-700 mb-6 sm:mb-8">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                 Team Performance
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {teamPerformance.slice(0, 10).map((member, index) => (
-                  <div key={member.name} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                  <div key={member.name} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0">
                         {member.name.charAt(0).toUpperCase()}
                       </div>
-                      <div>
-                        <p className="text-white font-medium">{member.name}</p>
-                        <p className="text-slate-400 text-sm">
+                      <div className="min-w-0">
+                        <p className="text-white font-medium text-sm sm:text-base truncate">{member.name}</p>
+                        <p className="text-slate-400 text-xs sm:text-sm">
                           {member.completedTasks}/{member.totalTasks} tasks completed
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="w-24">
+                      <div className="w-20 sm:w-24">
                         <Progress value={member.completionRate} className="h-2 bg-slate-600" />
                       </div>
-                      <Badge className="bg-blue-500/20 text-blue-400 min-w-[3rem] text-center">
+                      <Badge className="bg-blue-500/20 text-blue-400 min-w-[3rem] text-center text-xs sm:text-sm">
                         {member.completionRate}%
                       </Badge>
                     </div>
@@ -374,33 +369,33 @@ export const Analytics: React.FC = () => {
         {/* Recent Activity */}
         {recentActivity.length > 0 && (
           <Card className="bg-slate-800/50 border-slate-700">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Calendar className="w-5 h-5" />
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white flex items-center gap-2 text-lg sm:text-xl">
+                <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
                 Recent Activity
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {recentActivity.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
-                    <div className="flex-1">
-                      <p className="text-white font-medium">{task.title}</p>
-                      <p className="text-slate-400 text-sm">Assigned to {task.assignee}</p>
+                  <div key={task.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 bg-slate-700/30 rounded-lg gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-medium text-sm sm:text-base truncate">{task.title}</p>
+                      <p className="text-slate-400 text-xs sm:text-sm">Assigned to {task.assignee}</p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                       <Badge
-                        className={
+                        className={`text-xs sm:text-sm ${
                           task.status === "completed"
                             ? "bg-green-500/20 text-green-400"
                             : task.status === "in-progress"
                               ? "bg-blue-500/20 text-blue-400"
                               : "bg-gray-500/20 text-gray-400"
-                        }
+                        }`}
                       >
                         {task.status === "in-progress" ? "In Progress" : task.status === "todo" ? "To Do" : "Completed"}
                       </Badge>
-                      <span className="text-slate-400 text-sm">{new Date(task.dueDate).toLocaleDateString()}</span>
+                      <span className="text-slate-400 text-xs sm:text-sm">{new Date(task.dueDate).toLocaleDateString()}</span>
                     </div>
                   </div>
                 ))}
@@ -412,4 +407,3 @@ export const Analytics: React.FC = () => {
     </div>
   )
 }
-export default Analytics;

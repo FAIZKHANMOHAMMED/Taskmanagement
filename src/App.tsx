@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import BoardView from "./pages/BoardView"
 import BoardDetail from "./pages/BoardDetail"
-import Analytics from "./pages/Analytics"
+import { Analytics } from "./pages/Analytics"
 import TeamSettings from "./pages/TeamSettings"
 import NotFound from "./pages/NotFound"
 
