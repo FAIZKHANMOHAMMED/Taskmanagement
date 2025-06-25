@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useTaskStore, type Column, type Task } from "@/store/taskStore"
-import { TaskCard } from "./TaskCard";
+import  TaskCard  from "./TaskCard";
 import { HighlightText } from "./HighlightText"
 
 interface TaskColumnProps {
