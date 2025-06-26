@@ -1,12 +1,19 @@
 "use client"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, CheckCircle, Star } from "lucide-react"
+import { ArrowRight, CheckCircle, Star, LogOut } from "lucide-react"
+import { useAuthStore } from "@/store/authStore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 const HomePage = () => {
   const navigate = useNavigate()
+  const { logout } = useAuthStore()
+  
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   const testimonials = [
     {
@@ -47,7 +54,15 @@ const HomePage = () => {
               </div>
               <span className="text-xl font-bold text-white">TaskFlow</span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                className="text-slate-300 hover:bg-slate-800 hover:text-white"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
               <a href="#testimonials" className="text-slate-300 hover:text-white transition-colors">
                 Testimonials
               </a>

@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import { boardAPI, taskAPI } from "../services/api"
 
 export interface Task {
   id: string
