@@ -1,21 +1,43 @@
+export interface User {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+}
+
+export interface Comment {
+  author: User
+  content: string
+  createdAt: string
+}
+
 export interface Task {
-  id: string
+  _id: string
   title: string
-  description: string
-  creator: string
+  description?: string
+  creator: User
+  assignee?: User
   priority: "high" | "medium" | "low"
   status: "todo" | "in-progress" | "completed"
-  dueDate: string
-  assignee: string
+  dueDate?: string
   columnId: string
+  boardId: string
   position: number
+  tags?: string[]
+  comments?: Comment[]
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Column {
-  id: string
+  _id: string
+  id?: string  // Keep for backward compatibility
   title: string
   boardId: string
   position: number
+  color?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Board {

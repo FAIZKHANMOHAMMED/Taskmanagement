@@ -1,8 +1,8 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { useParams, Link } from "react-router-dom"
+import React, { useState, useEffect } from "react"
+import { v4 as uuidv4 } from 'uuid'
+import { useParams, Link, useNavigate } from "react-router-dom"
 import { ArrowLeft, Plus, Menu } from "lucide-react"
 import {
   DndContext,
@@ -22,8 +22,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { useTaskStore, type Task } from "@/store/taskStore"
+import { useBoardStore } from "@/store/boardStore"
 import { TaskColumn } from "@/components/TaskColumn"
-import  TaskCard  from "../components/TaskCard"
+import { TaskCard } from "@/components/TaskCard"
 import { CreateTaskDialog } from "@/components/CreateTaskDialog"
 import { SearchBar, type SearchFilters } from "@/components/SearchBar"
 import { useSearch } from "@/hooks/useSearch"
@@ -31,18 +32,29 @@ import { useIsMobile } from "@/hooks/use-mobile"
 
 const BoardDetail = () => {
   const { boardId } = useParams<{ boardId: string }>()
+  const navigate = useNavigate()
   const isMobile = useIsMobile()
+  const { 
+    currentBoard: board, 
+    columns: allColumns, 
+    fetchBoard, 
+    isLoading 
+  } = useBoardStore()
   const {
-    getBoardById,
-    getColumnsByBoardId,
     getTasksByColumnId,
     addColumn,
     deleteColumn,
-    updateColumn,
     moveTask,
-    reorderTasks,
-    reorderColumns,
   } = useTaskStore()
+
+  // Fetch board data when component mounts or boardId changes
+  useEffect(() => {
+    if (boardId) {
+      fetchBoard(boardId).catch(() => {
+        // Handle error if board is not found
+      })
+    }
+  }, [boardId, fetchBoard])
 
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [isCreateColumnDialogOpen, setIsCreateColumnDialogOpen] = useState(false)
@@ -67,9 +79,8 @@ const BoardDetail = () => {
     }),
   )
 
-  const board = getBoardById(boardId)
-  const allColumns = getColumnsByBoardId(boardId)
-  const allTasks = allColumns.flatMap((column) => getTasksByColumnId(column.id))
+  // Use the columns from boardStore which are already filtered by boardId
+  const allTasks = allColumns.flatMap((column) => getTasksByColumnId(column._id))
 
   // Use search hook
   const {
@@ -86,6 +97,7 @@ const BoardDetail = () => {
     e.preventDefault()
     if (newColumnTitle.trim()) {
       addColumn({
+        id: uuidv4(),
         title: newColumnTitle.trim(),
         boardId,
         position: allColumns.length,
@@ -202,6 +214,14 @@ const BoardDetail = () => {
       </Button>
     </div>
   )
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="animate-pulse text-slate-400">Loading board...</div>
+      </div>
+    )
+  }
 
   if (!boardId || !board) {
     return (
@@ -350,21 +370,22 @@ const BoardDetail = () => {
                 isMobile ? "space-x-3" : "space-x-4 lg:space-x-6"
               } overflow-x-auto pb-4 lg:pb-6 -mx-3 sm:-mx-4 lg:-mx-8 px-3 sm:px-4 lg:px-8 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800`}
             >
-              <SortableContext items={columnsToShow.map((col) => col.id)} strategy={horizontalListSortingStrategy}>
+              <SortableContext items={columnsToShow.map((col) => col._id)} strategy={horizontalListSortingStrategy}>
                 {columnsToShow.map((column, index) => {
-                  const columnTasks = getColumnTasks(column.id)
+                  const columnTasks = getColumnTasks(column._id)
                   const isColumnFiltered =
                     hasActiveSearch &&
                     (column.title.toLowerCase().includes(searchQuery.toLowerCase()) || columnTasks.length > 0)
 
                   return (
                     <div
-                      key={column.id}
+                      key={column._id}
                       className="animate-in slide-in-from-bottom-4 flex-shrink-0"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
                       <TaskColumn
                         column={column}
+                        boardId={boardId}
                         tasks={columnTasks}
                         onDeleteColumn={handleDeleteColumn}
                         onCreateTask={(columnId) => {
@@ -420,7 +441,7 @@ const BoardDetail = () => {
               setSelectedColumnId("")
             }}
             boardId={boardId}
-            preselectedColumnId={selectedColumnId}
+            columnId={selectedColumnId}
           />
         </div>
       </div>

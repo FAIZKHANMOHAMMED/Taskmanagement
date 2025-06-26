@@ -1,25 +1,18 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import { v4 as uuidv4 } from 'uuid'
 import { boardAPI, taskAPI } from "../services/api"
+import type { Task as TaskType, Column as ColumnType } from "../types"
 
-export interface Task {
+export interface Task extends Omit<TaskType, 'id'> {
   id: string
-  title: string
-  description: string
-  creator: string
-  priority: "high" | "medium" | "low"
-  status: "todo" | "in-progress" | "completed"
-  dueDate: string
-  assignee: string
-  columnId: string
-  position: number
 }
 
-export interface Column {
+export interface Column extends Omit<ColumnType, 'id'> {
   id: string
-  title: string
-  boardId: string
-  position: number
+  _id: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Board {
@@ -41,9 +34,9 @@ interface TaskStore {
   updateBoard: (boardId: string, updates: Partial<Board>) => void
 
   // Column actions
-  addColumn: (column: Omit<Column, "id">) => void
+  addColumn: (column: Omit<Column, '_id' | 'createdAt' | 'updatedAt'>) => void
   deleteColumn: (columnId: string) => void
-  updateColumn: (columnId: string, updates: Partial<Column>) => void
+  updateColumn: (columnId: string, updates: Partial<Omit<Column, '_id' | 'createdAt' | 'updatedAt'>>) => void
   reorderColumns: (boardId: string, sourceIndex: number, destinationIndex: number) => void
 
   // Task actions
@@ -94,16 +87,21 @@ export const useTaskStore = create<TaskStore>()(
           boards: state.boards.map((board) => (board.id === boardId ? { ...board, ...updates } : board)),
         })),
 
-      addColumn: (columnData) =>
+      addColumn: async (columnData) => {
+        const now = new Date().toISOString();
+        const newColumn: Column = {
+          ...columnData,
+          _id: uuidv4(),
+          id: uuidv4(),
+          createdAt: now,
+          updatedAt: now,
+          color: columnData.color || '#e5e7eb',
+        };
+        
         set((state) => ({
-          columns: [
-            ...state.columns,
-            {
-              ...columnData,
-              id: crypto.randomUUID(),
-            },
-          ],
-        })),
+          columns: [...state.columns, newColumn],
+        }))
+      },
 
       deleteColumn: (columnId) =>
         set((state) => ({

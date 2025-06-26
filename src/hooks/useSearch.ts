@@ -1,7 +1,8 @@
 "use client"
 
 import { useMemo } from "react"
-import type { Task, Column } from "@/store/taskStore"
+import type { Task } from "@/store/taskStore"
+import type { Column } from "../types"
 
 export interface SearchFilters {
   priority?: "high" | "medium" | "low"

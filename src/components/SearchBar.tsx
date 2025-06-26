@@ -24,13 +24,29 @@ export interface SearchFilters {
   overdue?: boolean
 }
 
+interface User {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+}
+
+const getUserDisplayName = (user: User) => {
+  if (!user) return 'Unassigned';
+  return `${user.firstName} ${user.lastName}`.trim() || user.email;
+};
+
+const getUserById = (users: User[], id: string) => {
+  return users.find(user => user._id === id);
+};
+
 interface SearchBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   filters: SearchFilters
   onFiltersChange: (filters: SearchFilters) => void
-  availableAssignees: string[]
-  availableCreators: string[]
+  availableAssignees: User[]
+  availableCreators: User[]
   resultsCount?: number
 }
 
@@ -208,7 +224,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                           variant="outline"
                           className="w-full justify-between border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700 text-sm"
                         >
-                          <span className="truncate">{filters.assignee || "Any Assignee"}</span>
+                          {filters.assignee ? (
+                            <span>{getUserDisplayName(getUserById(availableAssignees, filters.assignee))}</span>
+                          ) : (
+                            "Any Assignee"
+                          )}
                           <ChevronDown className="w-3 h-3 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -224,11 +244,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                             <DropdownMenuSeparator className="bg-slate-700" />
                             {availableAssignees.map((assignee) => (
                               <DropdownMenuItem
-                                key={assignee}
-                                onClick={() => onFiltersChange({ ...filters, assignee })}
+                                key={assignee._id}
+                                onClick={() => onFiltersChange({ ...filters, assignee: assignee._id })}
                                 className="hover:bg-slate-700 focus:bg-slate-700"
                               >
-                                {assignee}
+                                {getUserDisplayName(assignee)}
                               </DropdownMenuItem>
                             ))}
                           </>
@@ -246,7 +266,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                           variant="outline"
                           className="w-full justify-between border-slate-600 text-slate-300 hover:text-white hover:bg-slate-700 text-sm"
                         >
-                          <span className="truncate">{filters.creator || "Any Creator"}</span>
+                          {filters.creator ? (
+                            <span>{getUserDisplayName(getUserById(availableCreators, filters.creator))}</span>
+                          ) : (
+                            "Any Creator"
+                          )}
                           <ChevronDown className="w-3 h-3 flex-shrink-0" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -262,11 +286,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                             <DropdownMenuSeparator className="bg-slate-700" />
                             {availableCreators.map((creator) => (
                               <DropdownMenuItem
-                                key={creator}
-                                onClick={() => onFiltersChange({ ...filters, creator })}
+                                key={creator._id}
+                                onClick={() => onFiltersChange({ ...filters, creator: creator._id })}
                                 className="hover:bg-slate-700 focus:bg-slate-700"
                               >
-                                {creator}
+                                {getUserDisplayName(creator)}
                               </DropdownMenuItem>
                             ))}
                           </>

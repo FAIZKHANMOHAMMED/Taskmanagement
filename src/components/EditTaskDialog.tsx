@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { type Task, useTaskStore } from "@/store/taskStore"
+import { type Task, useBoardStore } from "@/store/boardStore"
 
 interface EditTaskDialogProps {
   task: Task
@@ -17,45 +17,43 @@ interface EditTaskDialogProps {
 }
 
 export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({ task, isOpen, onClose }) => {
-  const { updateTask, columns } = useTaskStore()
+  const { updateTask, columns } = useBoardStore()
   const [editTask, setEditTask] = useState({
     title: task.title,
-    description: task.description,
-    creator: task.creator,
+    description: task.description || "",
     priority: task.priority,
     status: task.status,
-    dueDate: task.dueDate,
-    assignee: task.assignee,
+    dueDate: task.dueDate || "",
     columnId: task.columnId,
   })
 
   useEffect(() => {
     setEditTask({
       title: task.title,
-      description: task.description,
-      creator: task.creator,
+      description: task.description || "",
       priority: task.priority,
       status: task.status,
-      dueDate: task.dueDate,
-      assignee: task.assignee,
+      dueDate: task.dueDate || "",
       columnId: task.columnId,
     })
   }, [task])
 
-  const taskColumn = columns.find((col) => col.id === task.columnId)
+  const taskColumn = columns.find((col) => col._id === task.columnId)
   const boardColumns = columns.filter((col) => col.boardId === taskColumn?.boardId)
 
-  const handleUpdateTask = (e: React.FormEvent) => {
+  const handleUpdateTask = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editTask.title.trim() && editTask.creator.trim() && editTask.assignee.trim()) {
-      updateTask(task.id, {
-        ...editTask,
-        title: editTask.title.trim(),
-        description: editTask.description.trim(),
-        creator: editTask.creator.trim(),
-        assignee: editTask.assignee.trim(),
-      })
-      onClose()
+    if (editTask.title.trim()) {
+      try {
+        await updateTask(task._id, {
+          ...editTask,
+          title: editTask.title.trim(),
+          description: editTask.description.trim(),
+        })
+        onClose()
+      } catch (error) {
+        console.error("Failed to update task:", error)
+      }
     }
   }
 
@@ -92,36 +90,6 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({ task, isOpen, on
               rows={3}
               className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="editTaskCreator" className="text-slate-300">
-                Creator
-              </Label>
-              <Input
-                id="editTaskCreator"
-                value={editTask.creator}
-                onChange={(e) => setEditTask({ ...editTask, creator: e.target.value })}
-                placeholder="Creator name"
-                required
-                className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="editTaskAssignee" className="text-slate-300">
-                Assignee
-              </Label>
-              <Input
-                id="editTaskAssignee"
-                value={editTask.assignee}
-                onChange={(e) => setEditTask({ ...editTask, assignee: e.target.value })}
-                placeholder="Assigned to"
-                required
-                className="bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:ring-blue-500"
-              />
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -173,7 +141,6 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({ task, isOpen, on
               type="date"
               value={editTask.dueDate}
               onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
-              required
               className="bg-slate-700 border-slate-600 text-white focus:ring-blue-500"
             />
           </div>
@@ -188,7 +155,7 @@ export const EditTaskDialog: React.FC<EditTaskDialogProps> = ({ task, isOpen, on
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-white">
                 {boardColumns.map((column) => (
-                  <SelectItem key={column.id} value={column.id}>
+                  <SelectItem key={column._id} value={column._id}>
                     {column.title}
                   </SelectItem>
                 ))}

@@ -2,204 +2,97 @@
 
 import type React from "react"
 import { useState } from "react"
-import { Plus, MoreHorizontal, Trash2, Edit } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Plus } from "lucide-react"
+import { type Column, useBoardStore } from "@/store/boardStore"
+import { TaskCard } from "./TaskCard"
+import { CreateTaskDialog } from "./CreateTaskDialog"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useTaskStore, type Column, type Task } from "@/store/taskStore"
-import  TaskCard  from "./TaskCard";
-import { HighlightText } from "./HighlightText"
 
 interface TaskColumnProps {
   column: Column
-  tasks: Task[]
-  onDeleteColumn: (columnId: string) => void
-  onCreateTask: (columnId: string) => void
+  boardId: string
+  tasks?: any[] // Optional since we're also getting tasks from the store
+  onDeleteColumn?: (columnId: string) => void
+  onCreateTask?: (columnId: string) => void
   searchQuery?: string
   isFiltered?: boolean
 }
 
-export const TaskColumn: React.FC<TaskColumnProps> = ({
-  column,
-  tasks,
-  onDeleteColumn,
-  onCreateTask,
-  searchQuery = "",
-  isFiltered = false,
-}) => {
-  const { updateColumn } = useTaskStore()
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [editTitle, setEditTitle] = useState(column.title)
-  const [isHovered, setIsHovered] = useState(false)
+export const TaskColumn: React.FC<TaskColumnProps> = ({ column, boardId }) => {
+  const { getTasksByColumnId } = useBoardStore()
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
-  const { setNodeRef, isOver } = useDroppable({
-    id: column.id,
-    data: {
-      type: "column",
-      column,
-    },
+  const tasks = getTasksByColumnId(column._id)
+  const taskIds = tasks.map((task) => task._id)
+
+  const { setNodeRef } = useDroppable({
+    id: column._id,
   })
 
-  const handleUpdateColumn = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (editTitle.trim()) {
-      updateColumn(column.id, { title: editTitle.trim() })
-      setIsEditDialogOpen(false)
-    }
+  const getColumnColor = () => {
+    if (column.color) return column.color
+
+    // Default colors based on common column names
+    const title = column.title.toLowerCase()
+    if (title.includes("todo") || title.includes("backlog")) return "bg-slate-50 border-slate-200"
+    if (title.includes("progress") || title.includes("doing")) return "bg-blue-50 border-blue-200"
+    if (title.includes("done") || title.includes("complete")) return "bg-green-50 border-green-200"
+    if (title.includes("review") || title.includes("testing")) return "bg-yellow-50 border-yellow-200"
+
+    return "bg-gray-50 border-gray-200"
   }
 
   return (
     <>
-      <Card
-        ref={setNodeRef}
-        className={`w-64 sm:w-72 lg:w-80 flex-shrink-0 transition-all duration-300 ease-in-out transform hover:scale-105 ${
-          isOver
-            ? "bg-gradient-to-br from-slate-700 to-slate-800 border-blue-400 shadow-2xl scale-105 ring-2 ring-blue-400"
-            : "bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700"
-        } backdrop-blur-sm shadow-xl ${searchQuery && !isFiltered ? "opacity-50" : ""} ${
-          searchQuery && isFiltered ? "ring-1 ring-yellow-400/50" : ""
-        }`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <CardHeader className="pb-4 px-3 sm:px-4 lg:px-6">
+      <Card className={`w-80 flex-shrink-0 ${getColumnColor()}`}>
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex-shrink-0"></div>
-              <h3
-                className={`font-bold text-slate-100 transition-colors duration-200 truncate text-sm sm:text-base ${
-                  isHovered ? "text-blue-300" : ""
-                }`}
-              >
-                <HighlightText text={column.title} searchQuery={searchQuery} />
-              </h3>
-              <span
-                className={`text-xs px-2 py-1 rounded-full transition-all duration-200 shrink-0 font-medium ${
-                  tasks.length > 0
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white animate-pulse shadow-lg"
-                    : "bg-slate-700 text-slate-300"
-                }`}
-              >
+            <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              {column.title}
+              <Badge variant="secondary" className="text-xs">
                 {tasks.length}
-              </span>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={`transition-all duration-200 hover:bg-slate-700 hover:rotate-90 shrink-0 h-6 w-6 sm:h-8 sm:w-8 p-0 text-slate-400 hover:text-white ${
-                    isHovered ? "opacity-100" : "opacity-70"
-                  }`}
-                >
-                  <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="bg-slate-800 border-slate-700 text-white shadow-xl animate-in slide-in-from-top-2 z-50"
-              >
-                <DropdownMenuItem
-                  onClick={() => setIsEditDialogOpen(true)}
-                  className="hover:bg-slate-700 focus:bg-slate-700 transition-colors"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit Column
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => onDeleteColumn(column.id)}
-                  className="text-red-400 focus:text-red-300 hover:bg-red-900/20 focus:bg-red-900/20 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Column
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </Badge>
+            </CardTitle>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="h-8 w-8 p-0 text-slate-600 hover:text-slate-800 hover:bg-slate-200"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-4 min-h-[200px] px-3 sm:px-4 lg:px-6">
-          <SortableContext items={tasks.map((task) => task.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3 sm:space-y-4">
-              {tasks.map((task, index) => (
-                <div
-                  key={task.id}
-                  className="animate-in slide-in-from-left-1 fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TaskCard task={task} />
-                </div>
+
+        <CardContent className="pt-0">
+          <div ref={setNodeRef} className="space-y-3 min-h-[200px] pb-4">
+            <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+              {tasks.map((task) => (
+                <TaskCard key={task._id} task={task} />
               ))}
-            </div>
-          </SortableContext>
+            </SortableContext>
 
-          {tasks.length === 0 && (
-            <div className="flex items-center justify-center h-24 sm:h-32 text-slate-400 animate-pulse">
-              <div className="text-center">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 mx-auto mb-2 sm:mb-3 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center text-lg sm:text-xl lg:text-2xl border border-slate-600">
-                  📋
-                </div>
-                <p className="text-xs sm:text-sm font-medium">{searchQuery ? "No matching tasks" : "No tasks yet"}</p>
-                <p className="text-xs text-slate-500 mt-1">
-                  {searchQuery ? "Try adjusting your search" : "Drag tasks here or create new ones"}
-                </p>
+            {tasks.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-8 text-slate-400">
+                <div className="text-4xl mb-2">📝</div>
+                <p className="text-sm text-center">No tasks yet</p>
+                <p className="text-xs text-center mt-1">Click + to add a task</p>
               </div>
-            </div>
-          )}
-
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-slate-400 hover:text-blue-300 hover:bg-slate-700/50 transition-all duration-200 group border-2 border-dashed border-slate-600 hover:border-blue-400 text-xs sm:text-sm py-2 sm:py-3"
-            onClick={() => onCreateTask(column.id)}
-          >
-            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2 group-hover:rotate-90 transition-transform duration-200" />
-            Add a task
-          </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md mx-4 animate-in fade-in-0 zoom-in-95 bg-slate-800 border-slate-700 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-slate-100">Edit Column</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleUpdateColumn} className="space-y-4">
-            <div>
-              <Label htmlFor="editColumnTitle" className="text-slate-300">
-                Column Title
-              </Label>
-              <Input
-                id="editColumnTitle"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                placeholder="Enter column title"
-                required
-                className="transition-all duration-200 focus:ring-2 focus:ring-blue-500 bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-                className="hover:bg-slate-700 transition-colors w-full sm:w-auto border-slate-600 text-slate-300 hover:text-white"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors w-full sm:w-auto"
-              >
-                Update Column
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CreateTaskDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+        columnId={column._id}
+        boardId={boardId}
+      />
     </>
   )
 }
