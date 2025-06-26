@@ -1,73 +1,109 @@
-# Welcome to your Lovable project
+# Task Management Application
 
-## Project info
+A modern task management application built with Vite, React, TypeScript, and shadcn/ui components. This application helps you organize and manage your tasks efficiently with a beautiful and responsive user interface.
 
-**URL**: https://lovable.dev/projects/e3a57803-9775-49b4-8fa2-2ad9b10046e5
+## 🚀 Getting Started
 
-## How can I edit this code?
+### Prerequisites
 
-There are several ways of editing your application.
+Before you begin, ensure you have the following installed on your system:
 
-**Use Lovable**
+- [Node.js](https://nodejs.org/) (v16 or later recommended)
+- [npm](https://www.npmjs.com/) (comes with Node.js) or [Yarn](https://yarnpkg.com/)
+- [Git](https://git-scm.com/)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e3a57803-9775-49b4-8fa2-2ad9b10046e5) and start prompting.
+### 🛠 Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/FAIZKHANMOHAMMED/Taskmanagement.git
+   cd Taskmanagement
+   ```
 
-**Use your preferred IDE**
+2. **Install dependencies**
+   ```bash
+   # Using npm
+   npm install
+   
+   # Or using Yarn
+   yarn install
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🚦 Running the Application
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+#### Development Mode
 
-Follow these steps:
+To start the development server with hot-reload:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+# Using npm
 npm run dev
+
+# Or using Yarn
+yarn dev
 ```
 
-**Edit a file directly in GitHub**
+This will start the development server at [http://localhost:5173](http://localhost:5173)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### Building for Production
 
-**Use GitHub Codespaces**
+To create a production build:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+# Using npm
+npm run build
 
-## What technologies are used for this project?
+# Or using Yarn
+yarn build
+```
 
-This project is built with:
+To preview the production build locally:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+# Using npm
+npm run preview
 
-## How can I deploy this project?
+# Or using Yarn
+yarn preview
+```
 
-Simply open [Lovable](https://lovable.dev/projects/e3a57803-9775-49b4-8fa2-2ad9b10046e5) and click on Share -> Publish.
+## 🧪 Testing
 
-## Can I connect a custom domain to my Lovable project?
+To run linting:
 
-Yes, you can!
+```bash
+# Using npm
+npm run lint
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# Or using Yarn
+yarn lint
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## 🛠 Built With
+
+- [Vite](https://vitejs.dev/) - Next Generation Frontend Tooling
+- [React](https://reactjs.org/) - A JavaScript library for building user interfaces
+- [TypeScript](https://www.typescriptlang.org/) - TypeScript is a typed superset of JavaScript
+- [shadcn/ui](https://ui.shadcn.com/) - Beautifully designed components
+- [Tailwind CSS](https://tailwindcss.com/) - A utility-first CSS framework
+- [@radix-ui](https://www.radix-ui.com/) - Unstyled, accessible components
+
+## 🤝 Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## 📧 Contact
+
+Faiz Khan Mohammed - [@yourtwitter](https://twitter.com/yourtwitter)
+
+Project Link: [https://github.com/FAIZKHANMOHAMMED/Taskmanagement](https://github.com/FAIZKHANMOHAMMED/Taskmanagement)
